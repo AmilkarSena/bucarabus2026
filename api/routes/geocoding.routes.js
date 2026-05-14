@@ -71,7 +71,13 @@ router.get('/search', async (req, res) => {
             },
             body: JSON.stringify({
               textQuery: q,
-              languageCode: 'es'
+              languageCode: 'es',
+              locationBias: {
+                circle: {
+                  center: { latitude: 7.1193, longitude: -73.1227 },
+                  radius: 30000.0 // 30km (Cubre AMB: Bga, Floridablanca, Girón, Piedecuesta)
+                }
+              }
             })
           });
 
