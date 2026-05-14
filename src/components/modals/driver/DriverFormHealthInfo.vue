@@ -26,24 +26,28 @@
         <select
           id="id_eps"
           v-model.number="formData.id_eps"
+          :class="{ 'error': errors.id_eps }"
         >
           <option value="">Seleccionar EPS</option>
           <option v-for="eps in epsList" :key="eps.id_eps" :value="eps.id_eps">
             {{ eps.name_eps }}
           </option>
         </select>
+        <span v-if="errors.id_eps" class="error-message">{{ errors.id_eps }}</span>
       </div>
       <div class="form-group">
         <label for="id_arl">ARL</label>
         <select
           id="id_arl"
           v-model.number="formData.id_arl"
+          :class="{ 'error': errors.id_arl }"
         >
           <option value="">Seleccionar ARL</option>
           <option v-for="arl in arlList" :key="arl.id_arl" :value="arl.id_arl">
             {{ arl.name_arl }}
           </option>
         </select>
+        <span v-if="errors.id_arl" class="error-message">{{ errors.id_arl }}</span>
       </div>
     </div>
 
@@ -78,6 +82,7 @@ import { inject } from 'vue'
 
 const {
   formData,
+  errors,
   epsList,
   arlList
 } = inject('driverFormContext')

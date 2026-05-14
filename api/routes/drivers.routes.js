@@ -2,6 +2,7 @@ import express from 'express'
 import driversService from '../services/drivers.service.js'
 import { verifyToken, requirePermission } from '../middlewares/auth.middleware.js'
 import { PERMISSIONS } from '../config/constants.js'
+import { driverSchema } from '../../shared/validations/driver.schema.js'
 
 const router = express.Router()
 
@@ -50,26 +51,37 @@ router.get('/:id', verifyToken, async (req, res) => {
 })
 
 /**
+ * Función helper para formatear errores Zod
+ */
+const formatZodErrors = (zodError) => {
+  const formatted = {}
+  const issues = zodError.issues || zodError.errors || []
+  issues.forEach(err => {
+    const field = err.path[0]
+    formatted[field] = err.message
+  })
+  return formatted
+}
+
+/**
  * POST /api/drivers
  * Crear nuevo conductor
- * Body requerido: { id_driver, name_driver, license_exp }
- * Body opcional:  { birth_date, address_driver, phone_driver, email_driver,
- *                   license_cat, id_eps, id_arl, blood_type, emergency_contact,
- *                   emergency_phone, date_entry, id_status, user_create }
  */
 router.post('/', requirePermission(PERMISSIONS.CREATE_DRIVERS), async (req, res) => {
   try {
-    const { id_driver, name_driver, license_exp } = req.body
-
-    if (!id_driver || !name_driver || !license_exp) {
+    // 1. Validación Zod (Capa 2: Reglas de Negocio)
+    const validation = driverSchema.safeParse(req.body)
+    
+    if (!validation.success) {
       return res.status(400).json({
         success: false,
-        message: 'Campos obligatorios: id_driver (cédula), name_driver, license_exp'
+        message: 'Errores de validación',
+        errors: formatZodErrors(validation.error)
       })
     }
 
     const result = await driversService.createDriver({
-      ...req.body,
+      ...validation.data,
       user_create: req.body.user_create || 1
     })
 
@@ -78,23 +90,42 @@ router.post('/', requirePermission(PERMISSIONS.CREATE_DRIVERS), async (req, res)
 
     // 🔔 Notificar a todos los clientes
     if (req.app.get('io')) {
-      req.app.get('io').emit('driver-updated', { action: 'create', id_driver: req.body.id_driver })
+      req.app.get('io').emit('driver-updated', { action: 'create', id_driver: validation.data.id_driver })
     }
   } catch (error) {
     console.error('Error en POST /drivers:', error)
-    res.status(500).json({ success: false, message: 'Error al crear conductor', error: error.message })
+    
+    // Capturar errores UNIQUE de la Base de Datos (Capa 3: Integridad)
+    if (error.code === '23505') {
+      if (error.constraint === 'pk_drivers') return res.status(409).json({ success: false, message: 'La cédula ya está registrada.' })
+      if (error.constraint === 'uq_driver_email') return res.status(409).json({ success: false, message: 'El correo electrónico ya está en uso por otro conductor.' })
+      if (error.constraint === 'uq_driver_phone') return res.status(409).json({ success: false, message: 'El número de teléfono ya está en uso por otro conductor.' })
+    }
+    
+    res.status(500).json({ success: false, message: 'Error interno: ' + error.message, error: error.message })
   }
 })
 
 /**
  * PUT /api/drivers/:id
  * Actualizar conductor
- * Body: campos a modificar + { user_update }
  */
 router.put('/:id', requirePermission(PERMISSIONS.EDIT_DRIVERS), async (req, res) => {
   try {
+    // Para PUT, validamos los datos. Podemos usar el mismo esquema.
+    // Dependiendo de si se envían todos los datos, safeParse está bien.
+    const validation = driverSchema.safeParse(req.body)
+    
+    if (!validation.success) {
+      return res.status(400).json({
+        success: false,
+        message: 'Errores de validación',
+        errors: formatZodErrors(validation.error)
+      })
+    }
+
     const result = await driversService.updateDriver(req.params.id, {
-      ...req.body,
+      ...validation.data,
       user_update: req.body.user_update || 1
     })
 
@@ -107,7 +138,14 @@ router.put('/:id', requirePermission(PERMISSIONS.EDIT_DRIVERS), async (req, res)
     }
   } catch (error) {
     console.error('Error en PUT /drivers/:id:', error)
-    res.status(500).json({ success: false, message: 'Error al actualizar conductor', error: error.message })
+    
+    // Capturar errores UNIQUE
+    if (error.code === '23505') {
+      if (error.constraint === 'uq_driver_email') return res.status(409).json({ success: false, message: 'El correo electrónico ya está en uso por otro conductor.' })
+      if (error.constraint === 'uq_driver_phone') return res.status(409).json({ success: false, message: 'El número de teléfono ya está en uso por otro conductor.' })
+    }
+
+    res.status(500).json({ success: false, message: 'Error interno: ' + error.message, error: error.message })
   }
 })
 

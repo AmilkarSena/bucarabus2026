@@ -170,7 +170,19 @@ class DriversService {
 
       const response = result.rows[0]
       if (!response.success) {
-        return { success: false, message: response.msg, error_code: response.error_code }
+        let friendlyMessage = response.msg
+        if (response.error_code === 'DRIVER_UNIQUE_VIOLATION') {
+          if (friendlyMessage.includes('pk_drivers')) {
+            friendlyMessage = 'Ya existe un conductor registrado con esta cédula.'
+          } else if (friendlyMessage.includes('uq_drivers_phone') || friendlyMessage.includes('uq_driver_phone')) {
+            friendlyMessage = 'El número de teléfono ya está en uso por otro conductor.'
+          } else if (friendlyMessage.includes('uq_drivers_email') || friendlyMessage.includes('uq_driver_email')) {
+            friendlyMessage = 'El correo electrónico ya está registrado por otro conductor.'
+          } else {
+            friendlyMessage = 'Un campo único ya está en uso (Cédula, Teléfono o Correo).'
+          }
+        }
+        return { success: false, message: friendlyMessage, error_code: response.error_code }
       }
 
       const driverResult = await this.getDriverById(response.out_driver)

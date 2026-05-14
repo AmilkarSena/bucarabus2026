@@ -2,6 +2,18 @@ import express from 'express'
 import busesService from '../services/buses.service.js'
 import { verifyToken, requirePermission } from '../middlewares/auth.middleware.js'
 import { PERMISSIONS } from '../config/constants.js'
+import { busSchema } from '../../shared/validations/bus.schema.js'
+
+// Helper para formatear errores Zod (versión segura sin forEach sobre null)
+const formatZodErrors = (zodError) => {
+  const formatted = {}
+  const issues = zodError.issues || zodError.errors || []
+  issues.forEach(err => {
+    const field = err.path[0]
+    formatted[field] = err.message
+  })
+  return formatted
+}
 
 const router = express.Router()
 
@@ -178,9 +190,19 @@ router.get('/:plate', requirePermission(PERMISSIONS.VIEW_BUSES), async (req, res
  */
 router.post('/', requirePermission(PERMISSIONS.CREATE_BUSES), async (req, res) => {
   try {
+    const validation = busSchema.safeParse(req.body)
+    
+    if (!validation.success) {
+      return res.status(400).json({
+        success: false,
+        message: 'Errores de validación',
+        errors: formatZodErrors(validation.error)
+      })
+    }
+
     // user_create viene del JWT, no del body (evita suplantación)
     const busData = {
-      ...req.body,
+      ...validation.data,
       user_create: req.user.id_user
     };
 
@@ -219,8 +241,20 @@ router.post('/', requirePermission(PERMISSIONS.CREATE_BUSES), async (req, res) =
 router.put('/:plate', requirePermission(PERMISSIONS.EDIT_BUSES), async (req, res) => {
   try {
     const { plate } = req.params;
+    
+    // Validar payload
+    const validation = busSchema.safeParse(req.body)
+    
+    if (!validation.success) {
+      return res.status(400).json({
+        success: false,
+        message: 'Errores de validación',
+        errors: formatZodErrors(validation.error)
+      })
+    }
+
     const busData = {
-      ...req.body,
+      ...validation.data,
       user_update: req.user.id_user  // viene del JWT
     };
     const result = await busesService.updateBus(plate, busData);

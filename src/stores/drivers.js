@@ -139,10 +139,16 @@ export const useDriversStore = defineStore('drivers', () => {
       }
     } catch (err) {
       console.error('❌ Error al crear conductor:', err)
-      error.value = err.response?.data?.message || err.message
+      let errorMsg = err.response?.data?.message || err.message
+      const validationErrors = err.response?.data?.errors
+      if (validationErrors && typeof validationErrors === 'object') {
+        const details = Object.values(validationErrors).join(', ')
+        if (details) errorMsg = `${errorMsg}: ${details}`
+      }
+      error.value = errorMsg
       return { 
         success: false, 
-        error: err.response?.data?.message || err.message 
+        error: errorMsg 
       }
     } finally {
       loading.value = false
@@ -189,10 +195,16 @@ export const useDriversStore = defineStore('drivers', () => {
       }
     } catch (err) {
       console.error('❌ Error al actualizar conductor:', err)
-      error.value = err.response?.data?.message || err.message
+      let errorMsg = err.response?.data?.message || err.message
+      const validationErrors = err.response?.data?.errors
+      if (validationErrors && typeof validationErrors === 'object') {
+        const details = Object.values(validationErrors).join(', ')
+        if (details) errorMsg = `${errorMsg}: ${details}`
+      }
+      error.value = errorMsg
       return { 
         success: false, 
-        error: err.response?.data?.message || err.message 
+        error: errorMsg 
       }
     } finally {
       loading.value = false

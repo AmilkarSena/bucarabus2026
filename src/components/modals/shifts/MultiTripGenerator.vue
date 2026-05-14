@@ -37,6 +37,7 @@
               v-model.number="frequency"
               type="number"
               min="1"
+              max="120"
               class="mini-modal-input"
               :class="{ 'input-error': error && error.field === 'frequency' }"
               @change="validateFrequency"
@@ -49,6 +50,7 @@
               v-model.number="duration"
               type="number"
               min="1"
+              max="240"
               class="mini-modal-input"
               :class="{ 'input-error': error && error.field === 'duration' }"
               @change="validateDuration"
@@ -134,12 +136,20 @@ const validateFrequency = () => {
     error.value = { field: 'frequency', msg: 'Debe ser un número positivo' }
     return
   }
+  if (frequency.value > 120) {
+    error.value = { field: 'frequency', msg: 'La frecuencia máxima es 120 minutos (2 horas)' }
+    return
+  }
   if (error.value && error.value.field === 'frequency') error.value = null
 }
 
 const validateDuration = () => {
   if (!duration.value || duration.value <= 0) {
     error.value = { field: 'duration', msg: 'Debe ser un número positivo' }
+    return
+  }
+  if (duration.value > 240) {
+    error.value = { field: 'duration', msg: 'La duración máxima es 240 minutos (4 horas)' }
     return
   }
   if (error.value && error.value.field === 'duration') error.value = null

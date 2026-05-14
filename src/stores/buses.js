@@ -84,10 +84,16 @@ export const useBusesStore = defineStore('buses', () => {
       }
     } catch (err) {
       console.error('❌ Error al crear bus:', err)
-      error.value = err.response?.data?.message || err.message
+      let errorMsg = err.response?.data?.message || err.message
+      const validationErrors = err.response?.data?.errors
+      if (validationErrors && typeof validationErrors === 'object') {
+        const details = Object.values(validationErrors).join(', ')
+        if (details) errorMsg = `${errorMsg}: ${details}`
+      }
+      error.value = errorMsg
       return { 
         success: false, 
-        error: err.response?.data?.message || err.message,
+        error: errorMsg,
         error_code: err.response?.data?.error_code
       }
     } finally {
@@ -118,10 +124,16 @@ export const useBusesStore = defineStore('buses', () => {
       }
     } catch (err) {
       console.error('❌ Error al actualizar bus:', err)
-      error.value = err.response?.data?.message || err.message
+      let errorMsg = err.response?.data?.message || err.message
+      const validationErrors = err.response?.data?.errors
+      if (validationErrors && typeof validationErrors === 'object') {
+        const details = Object.values(validationErrors).join(', ')
+        if (details) errorMsg = `${errorMsg}: ${details}`
+      }
+      error.value = errorMsg
       return { 
         success: false, 
-        error: err.response?.data?.message || err.message,
+        error: errorMsg,
         error_code: err.response?.data?.error_code
       }
     } finally {

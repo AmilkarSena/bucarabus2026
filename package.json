@@ -20,7 +20,8 @@
     "socket.io-client": "^4.8.3",
     "vue": "^3.3.0",
     "vue-router": "^4.2.0",
-    "vue3-leaflet": "^1.0.45"
+    "vue3-leaflet": "^1.0.45",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

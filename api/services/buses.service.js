@@ -352,18 +352,32 @@ class BusesService {
       const response = result.rows[0];
       // response contiene: { success, msg, error_code, out_id_bus, out_plate }
 
-      if (response.success) {
+      if (!response.success) {
+        let friendlyMessage = response.msg;
+        if (response.error_code === 'BUS_UNIQUE_VIOLATION') {
+          if (friendlyMessage.includes('uq_buses_plate_number') || friendlyMessage.includes('plate_number')) {
+            friendlyMessage = 'Ya existe un bus registrado con esta placa.';
+          } else if (friendlyMessage.includes('uq_buses_amb_code') || friendlyMessage.includes('amb_code')) {
+            friendlyMessage = 'El código AMB ya está en uso por otro bus.';
+          } else if (friendlyMessage.includes('code_internal')) {
+            friendlyMessage = 'El código interno ya está en uso por otro bus.';
+          } else if (friendlyMessage.includes('gps_device_id')) {
+            friendlyMessage = 'El ID de dispositivo GPS ya está registrado en otro bus.';
+          } else {
+            friendlyMessage = 'Un campo único ya está en uso (Placa, AMB, Código Interno o GPS).';
+          }
+        }
         return {
-          success: true,
-          message: response.msg,
-          data: { id_bus: response.out_id_bus, plate_number: response.out_plate }
+          success: false,
+          message: friendlyMessage,
+          error_code: response.error_code
         };
       }
 
       return {
-        success: false,
+        success: true,
         message: response.msg,
-        error_code: response.error_code
+        data: { id_bus: response.out_id_bus, plate_number: response.out_plate }
       };
     } catch (error) {
       console.error('Error en createBus:', error);
@@ -421,19 +435,33 @@ class BusesService {
 
       const response = result.rows[0];
 
-      if (response.success) {
-        const busResult = await this.getBusByPlate(plateNumber);
+      if (!response.success) {
+        let friendlyMessage = response.msg;
+        if (response.error_code === 'BUS_UNIQUE_VIOLATION') {
+          if (friendlyMessage.includes('uq_buses_plate_number') || friendlyMessage.includes('plate_number')) {
+            friendlyMessage = 'Ya existe un bus registrado con esta placa.';
+          } else if (friendlyMessage.includes('uq_buses_amb_code') || friendlyMessage.includes('amb_code')) {
+            friendlyMessage = 'El código AMB ya está en uso por otro bus.';
+          } else if (friendlyMessage.includes('code_internal')) {
+            friendlyMessage = 'El código interno ya está en uso por otro bus.';
+          } else if (friendlyMessage.includes('gps_device_id')) {
+            friendlyMessage = 'El ID de dispositivo GPS ya está registrado en otro bus.';
+          } else {
+            friendlyMessage = 'Un campo único ya está en uso (Placa, AMB, Código Interno o GPS).';
+          }
+        }
         return {
-          success: true,
-          message: response.msg,
-          data: busResult.data
+          success: false,
+          message: friendlyMessage,
+          error_code: response.error_code
         };
       }
 
+      const busResult = await this.getBusByPlate(plateNumber);
       return {
-        success: response.success,
+        success: true,
         message: response.msg,
-        error_code: response.error_code
+        data: busResult.data
       };
     } catch (error) {
       console.error('Error en updateBus:', error);

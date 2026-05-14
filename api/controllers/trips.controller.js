@@ -23,6 +23,16 @@ async function createTrip(req, res) {
       });
     }
 
+    // Validar formato de tiempo (HH:MM o HH:MM:SS)
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
+    if (!timeRegex.test(start_time) || !timeRegex.test(end_time)) {
+      return res.status(400).json({
+        success: false,
+        msg: 'El formato de hora debe ser HH:MM o HH:MM:SS válido',
+        error_code: 'INVALID_TIME_FORMAT'
+      });
+    }
+
     // Validar que la fecha no sea pasada
     // Ajuste para zona horaria: restamos 5 horas al server (Colombia) para la comparación
     const today = new Date(new Date().getTime() - (5 * 60 * 60 * 1000));
@@ -112,12 +122,20 @@ async function createTripsBatch(req, res) {
     }
 
     // Validar estructura de cada viaje
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
     for (let i = 0; i < trips.length; i++) {
       const trip = trips[i];
       if (!trip.start_time || !trip.end_time) {
         return res.status(400).json({
           success: false,
           msg: `Viaje en posición ${i} requiere start_time y end_time`
+        });
+      }
+      if (!timeRegex.test(trip.start_time) || !timeRegex.test(trip.end_time)) {
+        return res.status(400).json({
+          success: false,
+          msg: `Viaje en posición ${i} tiene un formato de hora inválido (debe ser HH:MM o HH:MM:SS)`,
+          error_code: 'INVALID_TIME_FORMAT'
         });
       }
     }
@@ -357,6 +375,15 @@ async function updateTrip(req, res) {
       id_status:  id_status  !== undefined ? id_status  : null,
       user_update
     };
+
+    // Validar formato de tiempo (HH:MM o HH:MM:SS) si se proporcionan
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
+    if (updateData.start_time && !timeRegex.test(updateData.start_time)) {
+      return res.status(400).json({ success: false, msg: 'Formato de start_time inválido', error_code: 'INVALID_TIME_FORMAT' });
+    }
+    if (updateData.end_time && !timeRegex.test(updateData.end_time)) {
+      return res.status(400).json({ success: false, msg: 'Formato de end_time inválido', error_code: 'INVALID_TIME_FORMAT' });
+    }
 
     const result = await tripsService.updateTrip(id_trip, updateData);
 
