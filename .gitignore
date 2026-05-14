@@ -19,6 +19,7 @@ dist_conductor/
 osrm_data/
 photon/photon_data/
 pgdata/
+api/database/
 
 # Logs
 *.log

@@ -1,9 +1,0 @@
-# Variables de conexión
-$usuario = "postgres"
-$base = "db_bucarabus"
-$carpeta = "C:\Users\dlast\Documents\previous_version\vue-bucarabus\api\database\functions_v2"
-
-# Ejecutar todos los archivos que empiecen por fun_
-Get-ChildItem "$carpeta\fun_*.sql" | ForEach-Object {
-    psql -U $usuario -d $base -f $_.FullName
-}
