@@ -1,0 +1,19 @@
+Column1;Column2;Column3;Column4
+Módulo;Tipo;Requerimiento;Descripción/Regla
+Base de Datos;Funcional;Arquitectura Espacial;El sistema utilizará PostgreSQL con la extensión PostGIS para el almacenamiento y análisis de geometrías LineString y Polygon.
+Base de Datos;Funcional;Integridad de Auditoría;Todas las tablas principales deben incluir obligatoriamente campos de rastreo: user_create, user_update, created_at y updated_at.
+Base de Datos;Funcional;Capa de Abstracción;Toda interacción de escritura (INSERT/UPDATE/DELETE) debe realizarse exclusivamente a través de Stored Functions para garantizar la lógica de negocio.
+Base de Datos;Funcional;Log de Eventos Inmuta;Se mantendrá una tabla de eventos (JSONB) para registrar cronológicamente cada cambio de estado en los viajes, permitiendo auditoría forense.
+Base de Datos;Funcional;Gestión de Roles;El motor de BD debe soportar una estructura de roles (Pasajero, Conductor, Supervisor, Administrador) vinculada mediante una tabla relacional.
+Base de Datos;Negocio;Validación de Formatos;La BD aplicará Constraints (Regex) para garantizar el formato legal de placas (ABC123), códigos AMB (AMB-0000) y correos electrónicos.
+Base de Datos;Negocio;Reglas de Capacidad;El sistema restringirá el ingreso de buses con capacidad inferior a 10 pasajeros o superior a 999 mediante restricciones Check.
+Base de Datos;Negocio;Vigencia de Documentación;Se implementarán disparadores o restricciones para asegurar que la fecha de vencimiento de SOAT y Técnico-Mecánica sea siempre futura al registro.
+Base de Datos;Negocio;Validación Temporal;La BD impedirá la creación de viajes donde la hora de finalización sea menor o igual a la hora de inicio (end_time > start_time).
+Base de Datos;Negocio;Restricción de Histórico;No se permitirá la programación de viajes con una antigüedad superior a 7 días respecto a la fecha actual.
+Base de Datos;No Funcional;Borrado Lógico;El sistema aplicará la técnica de soft-delete mediante campos booleanos (is_active), prohibiendo el uso de comandos DELETE físicos en tablas maestras.
+Base de Datos;No Funcional;Optimización de Búsqueda;Se implementarán índices parciales (WHERE is_active = TRUE) y funcionales (LOWER) para optimizar el rendimiento en consultas frecuentes.
+Base de Datos;No Funcional;Indexación Espacial;Las rutas geográficas contarán con índices de tipo GIST para permitir cálculos rápidos de proximidad y visualización en el mapa.
+Base de Datos;No Funcional;Manejo de Errores;Las Stored Functions deben retornar códigos de error estandarizados (VARCHAR) y mensajes en español, evitando excepciones SQL genéricas.
+Base de Datos;No Funcional;Atomicidad de Transacción;El motor garantizará que operaciones complejas (como la creación masiva de viajes) se ejecuten bajo una sola unidad transaccional.
+Base de Datos;No Funcional;Seguridad de Identidad;El ID del usuario del sistema (-1) se utilizará por defecto para auditoría en tareas automatizadas o disparadores internos.
+Base de Datos;No Funcional;Normalización;La BD seguirá la tercera forma normal (3NF) para evitar redundancias, separando detalles operativos (conductores) de los datos de identidad (usuarios).

@@ -1,0 +1,19 @@
+Column1;Column2;Column3;Column4;Column5
+Módulo;Tipo;Requerimiento;Descripción/Regla;
+Rutas y GIS;Funcional;Definición Geográfica;La plataforma debe permitir el trazado de rutas mediante la selección de puntos secuenciales sobre un mapa interactivo (GIS).;
+Rutas y GIS;Funcional;Gestión de Atributos;El software facilitará la edición de metadatos de la ruta como nombre descriptivo, áreas de origen/destino y color de representación.;
+Rutas y GIS;Funcional;Cálculo de Distancia;El sistema debe calcular automáticamente la longitud total de cada ruta en kilómetros utilizando funciones de análisis espacial.;
+Rutas y GIS;Funcional;Control de Visibilidad;La interfaz permitirá mostrar u ocultar capas de rutas de forma individual o masiva para optimizar la visualización en el mapa de monitoreo.;
+Rutas y GIS;Funcional;Estadísticas de Operación;La plataforma consolidará datos en tiempo real sobre el total de viajes realizados, buses vinculados y servicios activos por cada ruta.;
+Rutas y GIS;Funcional;Búsqueda Geoespacial;La herramienta posibilitará la localización de rutas específicas mediante filtros de texto por nombre o descripción técnica.;
+Rutas y GIS;Funcional;Vínculo de Flota;El sistema debe mostrar la relación de buses que están actualmente operando o asignados a una ruta particular.;
+Rutas y GIS;Negocio;Mínimo de Trazado;El software impedirá la creación de rutas que no cuenten con al menos dos puntos geográficos definidos (punto de inicio y fin).;
+Rutas y GIS;Negocio;Inmutabilidad del Recorrido;"Una vez guardada una ruta, su trazado geográfico será inmutable para proteger la integridad histórica de los viajes;  cambios en el trayecto requieren una nueva ruta.";
+Rutas y GIS;Negocio;Bloqueo por Actividad;La aplicación restringirá la eliminación de cualquier ruta que posea viajes activos o en curso en el sistema de despacho.;
+Rutas y GIS;Negocio;Auditoría de Cambios;El sistema registrará automáticamente el usuario y la marca de tiempo de cada creación o modificación realizada sobre el inventario de rutas.;
+Rutas y GIS;Negocio;Persistencia de Visibilidad;La configuración de rutas visibles en el mapa debe persistir únicamente durante la sesión activa del usuario para no sobrecargar el visor GIS.;
+Rutas y GIS;No Funcional;Precisión Espacial;La infraestructura utilizará el motor PostGIS para garantizar una precisión milimétrica en el almacenamiento de coordenadas (WGS84).;
+Rutas y GIS;No Funcional;Representación GeoJSON;El intercambio de datos geográficos entre el servidor y el cliente se realizará mediante el estándar GeoJSON para garantizar interoperabilidad.;
+Rutas y GIS;No Funcional;Rendimiento de Capas;La carga de múltiples capas de rutas en el mapa debe realizarse de forma asíncrona para no afectar la fluidez de la interfaz de usuario.;
+Rutas y GIS;No Funcional;Diferenciación Visual;El sistema asignará colores distintivos de la paleta corporativa a las nuevas rutas creadas para facilitar su identificación en el panel de control.;
+Rutas y GIS;No Funcional;Borrado Seguro;El software aplicará la inactivación lógica (soft-delete) de rutas, manteniendo el histórico de datos para reportes analíticos de largo plazo.;

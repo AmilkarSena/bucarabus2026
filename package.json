@@ -1,0 +1,38 @@
+{
+  "name": "bucarabus-admin",
+  "version": "1.0.0",
+  "description": "BucaraBus Dashboard - Vue.js SPA",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:ui": "vitest run",
+    "test:api": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test": "npm run test:ui && npm run test:api",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
+  },
+  "dependencies": {
+    "axios": "^1.12.2",
+    "leaflet": "^1.9.4",
+    "pinia": "^2.1.0",
+    "socket.io-client": "^4.8.3",
+    "vue": "^3.3.0",
+    "vue-router": "^4.2.0",
+    "vue3-leaflet": "^1.0.45"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/supertest": "^7.2.0",
+    "@vitejs/plugin-vue": "^4.2.0",
+    "@vue/test-utils": "^2.4.10",
+    "eslint": "^8.40.0",
+    "eslint-plugin-vue": "^9.11.0",
+    "jest": "^30.3.0",
+    "jsdom": "^29.1.1",
+    "supertest": "^7.2.2",
+    "vite": "^4.3.0",
+    "vite-plugin-pwa": "^1.2.0",
+    "vitest": "^4.1.5"
+  }
+}

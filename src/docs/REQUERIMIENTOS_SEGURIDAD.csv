@@ -1,0 +1,19 @@
+Column1;Column2;Column3;Column4
+Módulo;Tipo;Requerimiento;Descripción/Regla
+Autenticación y Seguridad;Funcional;Gestión de perfiles;La plataforma debe permitir al usuario gestionar su perfil personal incluyendo nombre, email y avatar.
+Autenticación y Seguridad;Funcional;Sistema de roles;El sistema debe permitir la asignación de roles específicos como Administrador, Supervisor, Conductor y Pasajero para controlar el acceso.
+Autenticación y Seguridad;Funcional;Seguridad de acceso;La aplicación debe permitir al usuario cambiar su contraseña y recuperar el acceso a su cuenta de forma segura en caso de olvido.
+Autenticación y Seguridad;Funcional;Sesiones;El software debe controlar las sesiones activas y permitir el cierre de sesión para garantizar la protección de la cuenta.
+Autenticación y Seguridad;Funcional;Cambio de Rol;BucaraBus posibilitará que un usuario con múltiples funciones cambie su rol activo (ej. de Conductor a Pasajero) sin necesidad de cerrar sesión.
+Autenticación y Seguridad;Funcional;Registro Seguro;La aplicación debe registrar nuevos usuarios asignándoles automáticamente el rol de Pasajero por defecto para prevenir escalada de privilegios.
+Autenticación y Seguridad;Funcional;Auditoría de Acceso;El sistema registrará automáticamente la fecha y hora del último ingreso exitoso de cada usuario en la base de datos.
+Autenticación y Seguridad;Funcional;Modo Fallback;El software integrará un sistema de usuarios de prueba (DEMO) para permitir el acceso a funciones críticas en caso de indisponibilidad del servidor principal.
+Autenticación y Seguridad;No Funcional;Encriptación;El software garantiza que todas las contraseñas se almacenen encriptadas de forma irreversible mediante el algoritmo bcrypt.
+Autenticación y Seguridad;No Funcional;Seguridad de API;El sistema debe implementar autenticación basada en tokens JWT (JSON Web Tokens) para proteger todos los puntos de acceso de la API.
+Autenticación y Seguridad;No Funcional;Borrado lógico;La plataforma implementará un mecanismo de inactivación de usuarios (soft-delete) para preservar la integridad referencial de los datos históricos.
+Autenticación y Seguridad;No Funcional;Protección XSS;La aplicación debe restringir el almacenamiento de datos sensibles (como IDs internos) en el localStorage para protegerse contra ataques de Cross-Site Scripting.
+Autenticación y Seguridad;No Funcional;Sesión en Memoria;El software mantendrá los identificadores sensibles del usuario estrictamente en la memoria volátil del navegador durante la sesión activa.
+Autenticación y Seguridad;No Funcional;Inyectabilidad;El núcleo del software debe estar protegido contra ataques de inyección SQL mediante el uso de consultas parametrizadas y pool de conexiones.
+Autenticación y Seguridad;No Funcional;Persistencia Segura;La herramienta permitiría restaurar las preferencias visuales del usuario (nombre, avatar) desde el almacenamiento local sin comprometer la seguridad de la cuenta.
+Autenticación y Seguridad;No Funcional;Refresco de Datos;El sistema debe proveer un mecanismo automático para re-validar la identidad del usuario contra el backend cuando se necesiten datos sensibles tras un refresco de página.
+Autenticación y Seguridad;No Funcional;Validación de Email;La plataforma asegurará que no existan duplicidad de cuentas verificando la existencia previa del correo electrónico en tiempo real durante el registro.

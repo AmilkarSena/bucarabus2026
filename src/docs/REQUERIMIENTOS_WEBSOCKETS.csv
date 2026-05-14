@@ -1,0 +1,18 @@
+Módulo;Tipo;Requerimiento;Descripción/Regla
+WebSockets y Tiempo Real;Funcional;Telemetría GPS;La plataforma debe permitir la transmisión continua de coordenadas, velocidad y rumbo del bus desde el dispositivo del conductor hacia el servidor.
+WebSockets y Tiempo Real;Funcional;Sincronización de Flota;Los nuevos clientes conectados deben recibir automáticamente el estado actual y la ubicación de todos los buses activos al iniciar sesión.
+WebSockets y Tiempo Real;Funcional;Notificación de Desplazamiento;El servidor debe retransmitir (broadcast) instantáneamente cualquier movimiento de un bus a todos los paneles de monitoreo activos.
+WebSockets y Tiempo Real;Funcional;Gestión de Sesión UI;La interfaz debe mostrar visualmente el estado de la conexión (🟢 Conectado/🔴 Desconectado) con el servidor de sockets.
+WebSockets y Tiempo Real;Funcional;Confirmación de Recepción;La aplicación del conductor debe recibir una señal de "ACK" (confirmación) tras cada envío de ubicación para validar la comunicación.
+WebSockets y Tiempo Real;Funcional;Control Dinámico de Turnos;El sistema debe emitir eventos específicos de "Inicio de Turno" y "Fin de Turno" para actualizar los indicadores de despacho en tiempo real.
+WebSockets y Tiempo Real;Funcional;Limpieza Automática;La plataforma debe detectar la desconexión física de un bus y removerlo automáticamente del mapa de monitoreo para evitar datos fantasma.
+WebSockets y Tiempo Real;Negocio;Datos Efímeros;Las ubicaciones GPS se mantendrán en la memoria volátil del servidor (Map) para maximizar la velocidad, eliminándose al finalizar el turno.
+WebSockets y Tiempo Real;Negocio;Filtro de Desconexión;Si un socket de conductor se desconecta por más de 60 segundos, el bus se marcará como desconectado en los paneles de supervisión.
+WebSockets y Tiempo Real;Negocio;Precedencia de Identidad;El sistema utilizará la placa del vehículo (plateNumber) como identificador único y primario para todas las tramas de datos en tiempo real.
+WebSockets y Tiempo Real;Negocio;Normalización Client-Side;Toda trama de datos recibida debe ser normalizada en el cliente para asegurar la consistencia visual, independientemente del origen del dato.
+WebSockets y Tiempo Real;No Funcional;Protocolo Híbrido;El sistema utilizará WebSockets como transporte primario, con retroceso (fallback) automático a Long Polling en redes inestables.
+WebSockets y Tiempo Real;No Funcional;Estrategia de Reconexión;La aplicación debe intentar reconectarse automáticamente hasta 5 veces con intervalos de 1 segundo ante caídas de red.
+WebSockets y Tiempo Real;No Funcional;Latencia Optimizada;El intervalo de Ping/Pong se configura a 25 segundos para mantener el túnel de comunicación abierto sin sobrecargar el ancho de banda.
+WebSockets y Tiempo Real;No Funcional;Seguridad CORS;El acceso al servidor de sockets estará restringido exclusivamente a los dominios autorizados de la aplicación (localhost/producción).
+WebSockets y Tiempo Real;No Funcional;Integridad Multicliente;La lógica del servidor debe procesar mensajes asíncronos para soportar múltiples buses y supervisores de forma simultánea.
+WebSockets y Tiempo Real;No Funcional;Arquitectura Singleton;El cliente mantendrá una única instancia del socket durante todo el ciclo de vida de la aplicación para evitar fugas de memoria.

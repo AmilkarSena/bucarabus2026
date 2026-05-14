@@ -1,0 +1,50 @@
+Módulo;Tipo;Requerimiento;Descripción/Regla
+Autenticación y Seguridad;Funcional;Gestión de perfiles;La plataforma debe permitir al usuario gestionar su perfil personal incluyendo nombre, email y avatar.
+Autenticación y Seguridad;Funcional;Sistema de roles;El sistema debe permitir la asignación de roles específicos como Administrador, Supervisor, Conductor y Pasajero.
+Autenticación y Seguridad;Funcional;Seguridad de acceso;La aplicación debe permitir al usuario cambiar su contraseña y recuperar el acceso a su cuenta de forma segura.
+Autenticación y Seguridad;Funcional;Sesiones;El software debe controlar las sesiones activas para garantizar la protección de la cuenta.
+Autenticación y Seguridad;Negocio;Encriptación;La aplicación asegura que todas las contraseñas se almacenen encriptadas mediante el algoritmo bcrypt.
+Autenticación y Seguridad;Negocio;Validación;El sistema debe validar que cada email tenga un formato correcto antes de permitir el registro.
+Autenticación y Seguridad;Negocio;Borrado lógico;El software implementará el borrado lógico para mantener el historial de usuarios inactivos sin eliminarlos físicamente.
+Gestión de Conductores;Dato;Identificación;La base de datos debe almacenar la cédula, el teléfono móvil y la dirección de residencia de cada conductor.
+Gestión de Conductores;Dato;Competencias;El sistema debe registrar la categoría de la licencia de conducción y su respectiva fecha de vencimiento.
+Gestión de Conductores;Funcional;CRM Conductores;El software debe permitir la creación, consulta y actualización de la información detallada de los conductores registrados.
+Gestión de Conductores;Funcional;Disponibilidad;La aplicación debe permitir monitorear si un conductor se encuentra disponible o asignado a un turno en tiempo real.
+Gestión de Conductores;Funcional;Estado;La plataforma facilitará la activación o inactivación de conductores según las políticas del administrador.
+Gestión de Conductores;Negocio;Seguridad Vial;La herramienta impedirá que un conductor con licencia vencida sea asignado a cualquier ruta activa.
+Gestión de Conductores;Negocio;Sincronización;BucaraBus retirará automáticamente de la lista de disponibles a cualquier conductor que sea marcado como inactivo.
+Gestión de Flota (Buses);Dato;Identificación;El inventario debe incluir la placa única y el código interno asignado por el AMB para cada bus.
+Gestión de Flota (Buses);Dato;Capacidad;El sistema registrará la capacidad máxima de pasajeros de cada vehículo para control de aforo.
+Gestión de Flota (Buses);Dato;Documentación;La aplicación almacenará las fechas de vencimiento del SOAT, Técnico-Mecánica y Seguros RCC/RCE.
+Gestión de Flota (Buses);Funcional;Búsqueda;El sistema debe permitir buscar buses rápidamente utilizando filtros por número de placa o código interno.
+Gestión de Flota (Buses);Funcional;Multimedia;El software permitirá cargar y visualizar fotografías para la identificación visual de los buses de la flota.
+Gestión de Flota (Buses);Negocio;Alertas;La aplicación debe resaltar visualmente aquellos buses cuyos documentos legales estén próximos a vencer en los siguientes 30 días.
+Gestión de Flota (Buses);Negocio;Estado Operativo;El sistema solo permitirá la asignación de turnos a buses que se encuentren en estado Activo y con documentos al día.
+Rutas y GIS;Funcional;Trazado;La herramienta debe permitir el dibujo y edición de trazados geográficos sobre el mapa mediante líneas de coordenadas.
+Rutas y GIS;Funcional;Cálculos;El software realizará el cálculo automático de la distancia total de la ruta expresada en kilómetros.
+Rutas y GIS;Funcional;Visualización;La interfaz permitirá asignar colores distintivos a cada ruta para facilitar su diferenciación en el monitor.
+Rutas y GIS;Negocio;Integridad;El sistema restringirá la eliminación de rutas que tengan viajes programados o turnos históricos asociados.
+Rutas y GIS;Negocio;Validación Geográfica;La plataforma debe validar que cada trazado de ruta cuente con al menos dos puntos geográficos para ser válido.
+Operación;Ciclo de Vida;Estado: Scheduled;La aplicación debe permitir programar viajes y turnos en el calendario operativo de forma anticipada.
+Operación;Ciclo de Vida;Estado: Active;El software iniciará el seguimiento en tiempo real cuando el conductor active el inicio del viaje desde su dispositivo.
+Operación;Ciclo de Vida;Estado: Completed;El sistema registrará la finalización exitosa del trayecto una vez el bus llegue a su destino final.
+Operación;Ciclo de Vida;Estado: Cancelled;La plataforma debe permitir al administrador anular viajes programados antes de su ejecución por motivos de fuerza mayor.
+Operación;Negocio;Exclusividad;El sistema garantizará que a un bus solo se le pueda asignar un conductor y una ruta de forma simultánea.
+Operación;Negocio;Progreso;El software calculará automáticamente el porcentaje de avance del viaje comparando la hora actual con el cronograma previsto.
+Monitor Live;Funcional;Visualización Real-Time;La plataforma debe permitir visualizar la ubicación exacta de todos los buses en movimiento sobre un mapa interactivo en tiempo real.
+Monitor Live;Funcional;Control de Capas;La aplicación facilitará al usuario la activación o desactivación de capas de rutas específicas para optimizar el análisis visual.
+Monitor Live;Funcional;Enfoque Automático;El software posibilitará el centrado automático de la vista del mapa sobre el trazado completo de una ruta seleccionada.
+Monitor Live;Funcional;Dashboard;La consola de monitoreo debe ofrecer métricas rápidas y actualizadas sobre el conteo de buses y rutas activas en la jornada.
+Monitor Live;Funcional;Búsqueda Inteligente;BucaraBus integrará una búsqueda instantánea de rutas, conductores o placas mediante una barra de filtrado inteligente.
+Monitor Live;Funcional;Estado de Señal;La interfaz ayudará al supervisor a identificar si un bus transmite GPS en vivo o si se encuentra en modo programado.
+Monitor Live;Funcional;Progreso;El Monitor Live calculará y mostrará el porcentaje de progreso de cada unidad basándose en la ventana horaria del turno.
+Monitor Live;Funcional;Desempeño;La herramienta presentará resúmenes de desempeño al finalizar cada trayecto, incluyendo velocidad máxima y distancia recorrida.
+Monitor Live;No Funcional;Latencia;La infraestructura debe garantizar que las actualizaciones de posición GPS se reflejen en menos de un segundo vía WebSockets.
+Monitor Live;No Funcional;Rendimiento;El motor de datos asegurará la estabilidad procesando coordenadas en memoria antes de persistirlas en la base de datos.
+Monitor Live;No Funcional;Diseño;La interfaz proporcionará una experiencia estética que permita colapsar paneles para priorizar la visibilidad del mapa.
+Monitor Live;No Funcional;Conectividad;La plataforma comunicará permanentemente el estado de conexión con el servidor mediante un indicador visual de conectividad.
+Monitor Live;No Funcional;Precisión;El núcleo tecnológico realizará cálculos espaciales de alta precisión utilizando el estándar PostGIS para la medición de distancias.
+General;No Funcional;Seguridad de API;El sistema debe implementar autenticación basada en tokens JWT para proteger todos los puntos de acceso de la API.
+General;No Funcional;Escalabilidad;El software debe soportar hasta 50 transmisiones GPS simultáneas manteniendo una latencia inferior a los 2 segundos.
+General;No Funcional;Arquitectura;La base de datos debe permitir la integración de múltiples empresas de transporte sin requerir cambios en la estructura del esquema.
+General;No Funcional;Accesibilidad;La aplicación debe ofrecer una interfaz responsiva que se adapte correctamente a dispositivos móviles y estaciones de monitoreo.

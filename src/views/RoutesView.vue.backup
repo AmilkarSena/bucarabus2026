@@ -1,0 +1,524 @@
+<template>
+  <div class="routes-section">
+    <div class="section-header">
+      <h4>Rutas Disponibles</h4>
+      <div class="header-actions">
+        <button class="btn secondary" @click="displayAllRoutes">
+          <span>🗺️</span> Ver Todas en Mapa
+        </button>
+        <button class="btn primary" @click="openRouteModal">
+          <span>➕</span> Nueva Ruta
+        </button>
+      </div>
+    </div>
+
+    <p>Total: {{ totalRoutes }} rutas registradas</p>
+
+    <div class="routes-container">
+      <div class="routes-search-header">
+        <h3>Listado de Rutas</h3>
+        <div class="search-box">
+          <input
+            type="text"
+            id="route-search"
+            v-model="searchQuery"
+            placeholder="Buscar ruta por nombre o ID..."
+            class="search-input"
+            @input="filterRoutes"
+          />
+        </div>
+      </div>
+
+      <div class="routes-list-container">
+        <div
+          v-for="route in filteredRoutes"
+          :key="route.id"
+          class="route-item"
+          :data-route-id="route.id"
+          :data-route-name="route.name.toLowerCase()"
+        >
+          <div class="route-header">
+            <div class="route-color-indicator" :style="{ backgroundColor: route.color || '#4285f4' }"></div>
+            <div class="route-main-info">
+              <h4 class="route-title">{{ route.name }}</h4>
+              <p class="route-summary">{{ getBusesForRoute(route.id).length }} {{ getBusesForRoute(route.id).length === 1 ? 'bus programado' : 'buses programados' }}</p>
+            </div>
+            <div class="route-actions-icons">
+              <button class="icon-btn edit-btn" @click="editRoute(route)" title="Editar ruta">
+                <span>✏️</span>
+              </button>
+              <button class="icon-btn view-btn" @click="viewRoute(route)" title="Ver en mapa">
+                <span>🗺️</span>
+              </button>
+              <button class="icon-btn toggle-btn" @click="toggleRouteDetails(route.id)" title="Ver buses programados">
+                <span>🚌</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="route-buses-schedule" :id="'schedule-' + route.id" :style="{ display: expandedRoutes.has(route.id) ? 'block' : 'none' }">
+            <div v-if="getBusesForRoute(route.id).length > 0" class="buses-simple-list">
+              <div
+                v-for="bus in getBusesForRoute(route.id)"
+                :key="bus.placa"
+                class="bus-simple-item"
+              >
+                <div class="bus-basic-info">
+                  <span class="bus-plate">{{ bus.placa }}</span>
+                  <span class="bus-driver">{{ bus.conductor }}</span>
+                </div>
+                <div class="bus-schedule-simple">
+                  <span class="schedule-time">{{ bus.horaInicio }} - {{ bus.horaFin }}</span>
+                  <span class="bus-status-simple" :class="bus.status || 'programado'">
+                    {{ bus.status === 'activo' ? '🟢' : bus.status === 'mantenimiento' ? '🔴' : '🔵' }}
+                  </span>
+                </div>
+                <div class="bus-quick-actions">
+                  <button class="mini-btn" @click="editBusSchedule(bus.placa, route.id)" title="Editar">⏰</button>
+                  <button class="mini-btn" @click="trackBus(bus.placa)" title="Ubicación">📍</button>
+                </div>
+              </div>
+              <div class="add-bus-simple">
+                <button class="btn-add-simple primary" @click="addBusToRoute(route.id)">
+                  + Agregar Bus
+                </button>
+              </div>
+            </div>
+            <div v-else class="no-buses-simple">
+              <p>Sin buses programados</p>
+              <button class="btn-add-simple primary" @click="addBusToRoute(route.id)">
+                + Programar Bus
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="filteredRoutes.length === 0" class="no-data">
+      {{ searchQuery ? 'No se encontraron rutas con los criterios de búsqueda.' : 'No hay rutas registradas. Haga clic en "Nueva Ruta" para agregar la primera.' }}
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue'
+import { useAppStore } from '../stores/app'
+import { useRoutesStore } from '../stores/routes'
+
+const appStore = useAppStore()
+const routesStore = useRoutesStore()
+
+// Estado local
+const searchQuery = ref('')
+const expandedRoutes = ref(new Set())
+
+// Computed properties
+const totalRoutes = computed(() => routesStore.routesCount)
+
+const filteredRoutes = computed(() => {
+  if (!searchQuery.value) return routesStore.routesList
+
+  const query = searchQuery.value.toLowerCase()
+  return routesStore.routesList.filter(route =>
+    route.name.toLowerCase().includes(query) ||
+    route.id.toLowerCase().includes(query)
+  )
+})
+
+// Métodos
+const openRouteModal = () => {
+  appStore.openModal('route')
+}
+
+const editRoute = (route) => {
+  appStore.openModal('editRoute', route)
+}
+
+const viewRoute = (route) => {
+  routesStore.clearActiveRoutes()
+  routesStore.activateRoute(route.id)
+  // El mapa se actualizará automáticamente a través del watcher
+}
+
+const displayAllRoutes = () => {
+  routesStore.clearActiveRoutes()
+  Object.keys(routesStore.routes).forEach(routeId => {
+    routesStore.activateRoute(routeId)
+  })
+}
+
+const toggleRouteDetails = (routeId) => {
+  if (expandedRoutes.value.has(routeId)) {
+    expandedRoutes.value.delete(routeId)
+  } else {
+    expandedRoutes.value.add(routeId)
+  }
+}
+
+const getBusesForRoute = (routeId) => {
+  return routesStore.getBusesForRoute(routeId)
+}
+
+const editBusSchedule = (placa, routeId) => {
+  appStore.openModal('shift', { placa, routeId })
+}
+
+const trackBus = (placa) => {
+  alert(`Rastreando bus ${placa}...\n\n📍 Ubicación actual: Calle 45 #23-15\n⏱️ Última actualización: ${new Date().toLocaleTimeString()}\n🚌 Estado: En ruta\n👤 Conductor: En línea`)
+}
+
+const addBusToRoute = (routeId) => {
+  appStore.openModal('shift', { routeId })
+}
+
+const filterRoutes = () => {
+  // Los filtros se aplican automáticamente a través de computed properties
+}
+</script>
+
+<style scoped>
+.routes-section {
+  padding: 0;
+}
+
+.section-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.section-header h4 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.routes-container {
+  margin-top: 20px;
+}
+
+.routes-search-header {
+  padding: 15px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f8f9fa;
+  border-radius: 12px 12px 0 0;
+}
+
+.routes-search-header h3 {
+  margin: 0 0 12px 0;
+  color: #1e293b;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.search-box {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #ddd;
+  border-radius: 25px;
+  font-size: 14px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.routes-list-container {
+  padding: 10px 0;
+  max-height: calc(100vh - 300px);
+  overflow-y: auto;
+  background: white;
+  border-radius: 0 0 12px 12px;
+  border: 1px solid #e0e0e0;
+  border-top: none;
+}
+
+.route-item {
+  margin: 8px 15px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.route-item:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.route-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.route-color-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  margin-right: 12px;
+}
+
+.route-main-info {
+  flex: 1;
+}
+
+.route-title {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.route-summary {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.route-actions-icons {
+  display: flex;
+  gap: 6px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #e1e5e9;
+  background: #f8fafc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.icon-btn.edit-btn:hover {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+
+.icon-btn.view-btn:hover {
+  background: #dbeafe;
+  border-color: #3b82f6;
+}
+
+.icon-btn.toggle-btn:hover {
+  background: #f0f9ff;
+  border-color: #0ea5e9;
+}
+
+.route-buses-schedule {
+  display: none;
+  background: #f8fafc;
+  border-top: 1px solid #e1e5e9;
+}
+
+.buses-simple-list {
+  padding: 16px 20px 8px;
+}
+
+.bus-simple-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 12px;
+}
+
+.bus-simple-item:last-child {
+  border-bottom: none;
+}
+
+.bus-basic-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.bus-plate {
+  font-weight: 700;
+  font-size: 14px;
+  color: #1f2937;
+  letter-spacing: 0.5px;
+}
+
+.bus-driver {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.bus-schedule-simple {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.schedule-time {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  min-width: 70px;
+}
+
+.bus-status-simple {
+  font-size: 16px;
+}
+
+.bus-quick-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.mini-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.mini-btn:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  transform: scale(1.05);
+}
+
+.add-bus-simple {
+  padding: 8px 20px 16px;
+  text-align: center;
+  border-top: 1px dashed #cbd5e1;
+  margin-top: 8px;
+}
+
+.btn-add-simple {
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.btn-add-simple:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.btn-add-simple.primary {
+  background: #3b82f6;
+  color: white;
+  padding: 10px 16px;
+  font-weight: 500;
+}
+
+.btn-add-simple.primary:hover {
+  background: #2563eb;
+}
+
+.no-buses-simple {
+  padding: 20px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.no-buses-simple p {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-style: italic;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+  font-style: italic;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    margin-left: 0;
+    align-self: stretch;
+  }
+
+  .route-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .route-actions-icons {
+    align-self: flex-end;
+  }
+
+  .bus-simple-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .bus-schedule-simple {
+    align-self: stretch;
+    justify-content: space-between;
+  }
+
+  .bus-quick-actions {
+    align-self: flex-end;
+  }
+}
+</style>

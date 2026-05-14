@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # 1. Base de Datos (PostGIS)
+  db:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: bucarabus-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-bucarabus}
+    # Solo accesible desde el host para túneles SSH (seguro)
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bucarabus_net
+
+  # 2. API Backend
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: bucarabus-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-bucarabus}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-bucarabus}
+      PORT: 3001
+      NODE_ENV: production
+      ALLOWED_ORIGINS: http://20.151.50.235,http://localhost,http://127.0.0.1
+      SOCKET_IO_ORIGINS: http://20.151.50.235,http://localhost,http://127.0.0.1
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./api/server.js:/app/server.js:ro
+      - ./api/routes/shifts.routes.js:/app/routes/shifts.routes.js:ro
+      - ./api/services/incidents.service.js:/app/services/incidents.service.js:ro
+      - ./api/routes/geocoding.routes.js:/app/routes/geocoding.routes.js:ro
+      - ./api/controllers/trips.controller.js:/app/controllers/trips.controller.js:ro
+      - ./api/services/trips.service.js:/app/services/trips.service.js:ro
+      - ./api/services/shifts.service.js:/app/services/shifts.service.js:ro
+    networks:
+      - bucarabus_net
+
+  # 3. Proxy Nginx (Sirve Frontends y reparte tráfico)
+  nginx:
+    image: nginx:alpine
+    container_name: bucarabus-gateway
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./dist_admin:/usr/share/nginx/html/admin
+      - ./dist_pasajero:/usr/share/nginx/html/pasajero
+      - ./dist_conductor:/usr/share/nginx/html/conductor
+    depends_on:
+      - api
+    networks:
+      - bucarabus_net
+
+  # 4. Motor de Rutas (OSRM)
+  osrm:
+    image: osrm/osrm-backend
+    container_name: bucarabus-osrm
+    restart: unless-stopped
+    volumes:
+      - ./osrm_data:/data
+    command: "osrm-routed --algorithm mld /data/bucaramanga.osrm"
+    networks:
+      - bucarabus_net
+
+  # 5. Geocodificación (Photon)
+  photon:
+    build: ./photon
+    container_name: bucarabus-photon
+    restart: unless-stopped
+    volumes:
+      - ./photon:/photon/photon_data
+    networks:
+      - bucarabus_net
+
+  # 6. Tiles Server
+  tiles:
+    build:
+      context: ./tiles
+      dockerfile: Dockerfile
+    container_name: bucarabus-tiles
+    restart: unless-stopped
+    volumes:
+      - ./tiles/bucaramanga.mbtiles:/data/bucaramanga.mbtiles:ro
+    networks:
+      - bucarabus_net
+
+volumes:
+  pgdata:
+networks:
+  bucarabus_net:
+    driver: bridge

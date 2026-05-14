@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">BucaraBus Pasajero</string>
+    <string name="title_activity_main">BucaraBus Pasajero</string>
+    <string name="package_name">com.bucarabus.passenger</string>
+    <string name="custom_url_scheme">com.bucarabus.passenger</string>
+</resources>

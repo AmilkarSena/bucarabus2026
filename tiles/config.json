@@ -1,0 +1,25 @@
+{
+  "options": {
+    "paths": {
+      "root":    "/usr/src/app",
+      "fonts":   "node_modules/tileserver-gl-styles/fonts",
+      "styles":  "styles",
+      "mbtiles": "/data"
+    }
+  },
+  "styles": {
+    "positron": {
+      "style": "positron/style.json",
+      "tilejson": {
+        "format":   "pbf",
+        "minzoom":  10,
+        "maxzoom":  20
+      }
+    }
+  },
+  "data": {
+    "openmaptiles": {
+      "mbtiles": "bucaramanga.mbtiles"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+Column1;Column2;Column3;Column4
+Módulo;Tipo;Requerimiento;Descripción/Regla
+Gestión de Conductores;Funcional;Registro de Conductor;La plataforma debe permitir la creación de perfiles vinculando datos de acceso con detalles profesionales como cédula y celular.
+Gestión de Conductores;Funcional;Control de Licencias;El software facilitará la gestión de categorías (C1, C2, C3) y el monitoreo de sus fechas de vencimiento.
+Gestión de Conductores;Funcional;Disponibilidad en Tiempo Real;"La aplicación posibilitará marcar a un conductor como ""Disponible"" o ""No Disponible"" para su asignación inmediata."
+Gestión de Conductores;Funcional;Perfil Multimedia;El sistema debe permitir la carga de una fotografía del conductor para su identificación visual en las aplicaciones de pasajeros y supervisores.
+Gestión de Conductores;Funcional;Búsqueda Especializada;La interfaz permitirá localizar conductores rápidamente mediante filtros por nombre, cédula, teléfono o categoría de licencia.
+Gestión de Conductores;Funcional;Métricas de Experiencia;El software calculará y mostrará estadísticas sobre la experiencia promedio del equipo y el total de personal disponible.
+Gestión de Conductores;Funcional;Telemetría GPS;La aplicación del conductor debe recolectar y transmitir las coordenadas GPS (latitud, longitud), rumbo y precisión del dispositivo cada 5 segundos.
+Gestión de Conductores;Funcional;Control de Turnos;"El sistema debe permitir al conductor ""Iniciar Turno"" y ""Terminar Turno"" registrando la hora exacta de la actividad."
+Gestión de Conductores;Funcional;Monitoreo de Velocidad;El software calculará la velocidad actual del vehículo en km/h a partir de los datos del sensor del dispositivo móvil.
+Gestión de Conductores;Funcional;Timeline de Viajes;La plataforma presentará al conductor una cronología de todos los viajes asignados para el día, indicando horas de inicio y fin estimadas.
+Gestión de Conductores;Funcional;Navegación Asistida;La aplicación dibujará en el mapa el trazado de la ruta activa y mostrará el progreso del viaje en porcentaje según su avance.
+Gestión de Conductores;Funcional;Estado de Conexión;El conductor debe contar con un indicador visual en tiempo real que confirme si el dispositivo está enviando datos al servidor.
+Gestión de Conductores;Negocio;Validación de Licencia;El sistema impedirá que un conductor con licencia vencida sea marcado como disponible para operar cualquier vehículo.
+Gestión de Conductores;Negocio;Unicidad de Identidad;La herramienta validará que no existan dos conductores registrados con el mismo número de cédula o email.
+Gestión de Conductores;Negocio;Sincronización de Estado;"Al inactivar administrativamente a un conductor, se le marcará automáticamente como ""No Disponible"" en todo el sistema."
+Gestión de Conductores;Negocio;Pre-requisito de Conexión;El software bloqueará el inicio de turno si el dispositivo del conductor no tiene una conexión estable con el servidor de Socket.io.
+Gestión de Conductores;Negocio;Seguridad de Sesión;La aplicación implementará el cierre de sesión persistente, asegurando que el conductor termine su turno antes de salir del sistema.
+Gestión de Conductores;No Funcional;Persistencia de Datos;La plataforma debe ser capaz de restaurar la sesión del conductor desde el almacenamiento local tras recargas accidentales del navegador.
+Gestión de Conductores;No Funcional;Alertas de Precisión;El sistema debe informar al conductor sobre la precisión del GPS (en metros) para garantizar la calidad de los datos de telemetría.
+Gestión de Conductores;No Funcional;Borrado Lógico;La aplicación implementará la técnica de soft-delete para conductores para preservar el historial de viajes e indicadores de desempeño.
+Gestión de Conductores;No Funcional;Adaptabilidad Móvil;La interfaz del conductor estará optimizada para uso en dispositivos móviles, permitiendo el control táctil de los tiempos de turno y navegación.

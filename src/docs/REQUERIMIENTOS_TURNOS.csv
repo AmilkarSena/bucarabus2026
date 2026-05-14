@@ -1,0 +1,20 @@
+Column1;Column2;Column3;Column4
+Módulo;Tipo;Requerimiento;Descripción/Regla
+Despacho y Turnos;Funcional;Planeación Semanal;La plataforma permitirá la gestión de horarios de operación organizados por semana para cada ruta del sistema.
+Despacho y Turnos;Funcional;Creación Masiva (Batch);El software facilitará la generación automática de múltiples viajes para una ruta y fecha específica en un solo comando.
+Despacho y Turnos;Funcional;Asignación de Tripulación;El sistema permitirá vincular un conductor disponible con un bus activo para cumplir con los turnos operativos programados.
+Despacho y Turnos;Funcional;Panel de Monitoreo;La aplicación dispondrá de un dashboard en vivo con indicadores de buses activos, rutas en línea y viajes completados.
+Despacho y Turnos;Funcional;Telemetría en Tiempo Real;El sistema integrará WebSockets para recibir y mostrar la ubicación en vivo de los buses durante el cumplimiento de su turno.
+Despacho y Turnos;Funcional;Control de Salida/Llegada;La plataforma permitirá registrar manualmente el inicio y fin de cada turno de servicio, ya sea por el despacho o por el conductor.
+Despacho y Turnos;Funcional;Historial de Cambios;El software mantendrá un log detallado (eventos) de todas las transiciones de estado de un viaje (ej: de programado a activo).
+Despacho y Turnos;Funcional;Buscador de Disponibilidad;La herramienta presentará listas filtradas de buses y conductores que no tienen asignaciones vigentes para facilitar el despacho.
+Despacho y Turnos;Funcional;Identificación Visual;El despacho visualizará tarjetas informativas por ruta con el nombre del conductor, placa del bus y estado del GPS (?? activo/inactivo).
+Despacho y Turnos;Negocio;Pre-requisitos de Turno;El sistema impedirá que un bus inicie un viaje si ya tiene otro turno activo en curso, evitando conflictos de despacho.
+Despacho y Turnos;Negocio;Justificación de Cancelación;Toda cancelación de un viaje activo requerirá obligatoriamente una descripción de al menos 10 caracteres por motivos de auditoría.
+Despacho y Turnos;Negocio;Validación de Tripulación;"La herramienta restringirá la asignación de personal que no se encuentre en estado ""Activo"" o ""Disponible"" en sus perfiles."
+Despacho y Turnos;Negocio;Cálculo de Eficiencia;El progreso de la ruta se calculará automáticamente comparando el tiempo transcurrido del viaje contra la duración total estimada.
+Despacho y Turnos;Negocio;Consistencia de Horarios;La plataforma validará que la hora de salida de un viaje sea estrictamente anterior a la hora de llegada programada.
+Despacho y Turnos;No Funcional;Persistencia en BD;Toda la lógica de creación y cancelación masiva debe ejecutarse mediante funciones de base de datos para garantizar atomicidad.
+Despacho y Turnos;No Funcional;Sincronización Multicliente;Cualquier cambio en el estado de un turno (inicio/fin) debe notificarse instantáneamente a todos los supervisores conectados.
+Despacho y Turnos;No Funcional;Integridad Referencial;El borrado de turnos será lógico (soft-delete), asegurando que los datos históricos de operación permanezcan para análisis.
+Despacho y Turnos;No Funcional;Escalabilidad de Monitoreo;El visor de despacho debe soportar la visualización fluida de múltiples capas de rutas y marcadores de buses simultáneamente.

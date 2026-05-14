@@ -1,0 +1,33 @@
+Id;Categoría;Requerimiento Detallado;Origen;Estado Actual;Observaciones
+1;Registro Base;El sistema debe permitir registrar la placa del bus, código interno AMB y capacidad máxima de pasajeros.;Documentado;Completado;
+2;Control Documental;El software facilitará el seguimiento registrando fechas de vencimiento de SOAT, Técnico-Mecánica y pólizas.;Documentado;Completado;
+3;Alertas Vencimiento;La plataforma alertará automáticamente sobre vehículos con documentos próximos a vencer en una ventana de 30 días.;Documentado;Completado;Lógica implementada a nivel backend
+4;Identificación Visual;El sistema posibilitará la carga de una fotografía del bus (máx 5MB) para identificación visual.;Documentado;Pendiente;
+5;Filtros Avanzados;La plataforma permitirá el filtrado de flota por empresa operadora, estado de disponibilidad y placa.;Documentado;Completado;
+6;Dueños Legales;El sistema registrará obligatoriamente el nombre y documento de identidad del propietario legal de cada bus.;Documentado;Completado;
+7;Estado Operativo;La aplicación clasificará cada bus automáticamente en estados como 'En servicio', 'Disponible', 'Con conductor' o 'Inactivo'.;Documentado;Parcial;Los catálogos existen pero la UI falta por conectarlos del todo
+8;Formato de Placa;El sistema validará estrictamente el estándar nacional de placa de servicio público (3 letras seguidas de 3 números).;Documentado;Completado;
+9;Formato AMB;El sistema asegurará que el código de autoridad siga el patrón AMB-#### o excepciones válidas (SA).;Documentado;Completado;
+10;Límites de Capacidad;El software restringirá la creación de buses con capacidad menor a 10 o mayor a 70 pasajeros.;Documentado;Completado;Constraint chk_buses_capacity
+11;Validación Vigencia;El sistema impedirá el registro de fechas de vencimiento de documentos que sean menores o iguales a la actual.;Documentado;Pendiente;
+12;Bloqueo Lógico;La aplicación evitará asignar un bus con estado 'Inactivo' a un conductor o ruta de servicio.;Documentado;Pendiente;
+13;Formulario Alta;Debe existir un formulario modal unificado para la creación (alta) y edición integral de los datos de un bus.;Descubierto;Completado;
+14;Selección de Catálogos;Permitir asignar la Empresa Operadora y Marca del Vehículo seleccionándolas mediante listas desplegables conectadas a la BD.;Descubierto;Completado;
+15;Validación Modelo;Forzar la captura del Año de Modelo del bus, impidiendo años irreales (ej. menores a 1990).;Descubierto;Completado;Constraint chk_buses_model_year
+16;Asignación Conductores;Permitir asignar un Conductor específico a un Bus desde una interfaz de gestión de flota o detalle del vehículo.;Descubierto;Completado;Soportado por tab_bus_assignments
+17;Historial Conductores;El sistema debe proveer una vista del historial de todos los conductores que ha tenido un bus específico a lo largo del tiempo.;Descubierto;Pendiente;La BD lo soporta, la UI no lo visualiza
+18;Desasignación;Proveer un botón explícito para desvincular al conductor actual del bus, liberando la unidad.;Descubierto;Pendiente;
+19;Seguros Dinámicos;El formulario de bus debe soportar el alta dinámica de múltiples tipos de pólizas (SOAT, Contractual) para una misma placa.;Descubierto;Completado;
+20;Renovación Documental;Permitir actualizar la vigencia de un documento o seguro (Renovación) sin destruir el historial anterior, generando nuevos registros.;Descubierto;Parcial;
+21;Creación Propietario Inline;Permitir registrar un Propietario nuevo 'al vuelo' directamente desde el panel de creación de bus si este no se encuentra en el listado.;Descubierto;Pendiente;
+22;Actualización Propietarios;Soportar la edición de datos de contacto (teléfono, email) del propietario del bus de forma independiente.;Descubierto;Completado;
+23;Buscador Inteligente;Implementar un input de búsqueda principal en el gestor de flota que busque simultáneamente coincidencias en Placa, Código AMB y Nombre del Dueño.;Descubierto;Parcial;
+24;Dashboard de Estados;Proveer una vista de tarjetas de buses que utilicen semaforización de colores (ej. Verde=Disponible) basados en el catálogo de base de datos.;Descubierto;Pendiente;
+25;Localización Real;Dentro de los detalles del bus, incluir un botón 'Localizar' que salte al mapa y enfoque la ubicación GPS en vivo del vehículo si está operando.;Descubierto;Pendiente;
+26;Cambio Estado Rápido;Permitir a los operadores cambiar manualmente el estado operativo de un bus directamente desde la vista lista mediante un menú contextual.;Descubierto;Pendiente;
+27;Vista de Cuadrícula/Tabla;Ofrecer opciones de visualización de flota tanto en formato tabla de datos (Data Table densa) como en tarjetas visuales (Grid).;Descubierto;Parcial;
+28;Exportación de Inventario;Incluir funcionalidad para descargar el reporte del inventario actual filtrado de buses en formato Excel (.xlsx) o CSV.;Descubierto;Pendiente;
+29;Panel Consolidado Detalle;Proveer un panel o modal expansivo de 'Ver Detalle' que resuma la información del bus, dueño, conductor, seguros y documentos en una pantalla.;Descubierto;Pendiente;
+30;Catálogo Aseguradoras;Vincular cada tipo de seguro a un listado de Compañías Aseguradoras reales administrables por el sistema.;Descubierto;Completado;Apoyado por tab_insurers
+31;Conteo Estadístico Parcial;El panel principal de flota debe mostrar tarjetas resumen con el conteo total de buses y su distribución rápida (Activos, Inactivos).;Descubierto;Completado;TopBar
+32;Gestión Tipo Documentos Tránsito;Soportar la asignación de Tarjeta de Operación y Revisión Técnico Mecánica como documentos independientes a los seguros.;Descubierto;Completado;Implementado vía tab_bus_transit_docs

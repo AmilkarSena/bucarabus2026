@@ -1,0 +1,543 @@
+CREATE OR REPLACE FUNCTION public.fun_update_driver(wid_user integer, wuser_update integer, wfull_name character varying DEFAULT NULL::character varying, wavatar_url character varying DEFAULT NULL::character varying, wcel character varying DEFAULT NULL::character varying, wlicense_cat character varying DEFAULT NULL::character varying, wlicense_exp date DEFAULT NULL::date, waddress_driver text DEFAULT NULL::text, wavailable boolean DEFAULT NULL::boolean, OUT success boolean, OUT msg character varying, OUT error_code character varying, OUT id_user integer, OUT id_card numeric)
+ RETURNS record
+ LANGUAGE plpgsql
+AS $function$
+
+DECLARE
+
+    v_name_clean        VARCHAR(100);
+
+    v_cel_clean         VARCHAR(15);
+
+    v_license_clean     VARCHAR(2);
+
+    v_avatar_clean      VARCHAR(500);
+
+    v_address_clean     TEXT;
+
+    v_updater_exists    BOOLEAN;
+
+    v_driver_exists     BOOLEAN;
+
+    v_is_driver         BOOLEAN;
+
+    v_driver_active     BOOLEAN;
+
+    v_driver_card       DECIMAL(12,0);
+
+    v_rows_affected     INTEGER;
+
+    v_available_status  BOOLEAN;
+
+BEGIN
+
+    success := FALSE;
+
+    msg := '';
+
+    error_code := NULL;
+
+    id_user := NULL;
+
+    id_card := NULL;
+
+    
+
+    SELECT EXISTS(
+
+        SELECT 1 FROM tab_users 
+
+        WHERE tab_users.id_user = wuser_update AND is_active = TRUE
+
+    ) INTO v_updater_exists;
+
+    
+
+    IF NOT v_updater_exists THEN
+
+        msg := 'El usuario actualizador no existe o est├â┬í inactivo (ID: ' || wuser_update || ')';
+
+        error_code := 'USER_UPDATE_NOT_FOUND';
+
+        RETURN;
+
+    END IF;
+
+    
+
+    IF wid_user IS NULL OR wid_user <= 0 THEN
+
+        msg := 'El ID del conductor es obligatorio y debe ser mayor que 0';
+
+        error_code := 'DRIVER_ID_INVALID';
+
+        RETURN;
+
+    END IF;
+
+    
+
+    SELECT EXISTS(
+
+        SELECT 1 FROM tab_users WHERE tab_users.id_user = wid_user
+
+    ) INTO v_driver_exists;
+
+    
+
+    IF NOT v_driver_exists THEN
+
+        msg := 'El conductor con ID ' || wid_user || ' no existe';
+
+        error_code := 'DRIVER_NOT_FOUND';
+
+        RETURN;
+
+    END IF;
+
+    
+
+    SELECT EXISTS(
+
+        SELECT 1 FROM tab_user_roles 
+
+        WHERE tab_user_roles.id_user = wid_user 
+
+          AND tab_user_roles.id_role = 2 
+
+          AND tab_user_roles.is_active = TRUE
+
+    ) INTO v_is_driver;
+
+    
+
+    IF NOT v_is_driver THEN
+
+        msg := 'El usuario con ID ' || wid_user || ' no es un conductor activo';
+
+        error_code := 'NOT_A_DRIVER';
+
+        RETURN;
+
+    END IF;
+
+    
+
+    SELECT is_active INTO v_driver_active
+
+    FROM tab_users
+
+    WHERE tab_users.id_user = wid_user;
+
+    
+
+    IF NOT v_driver_active THEN
+
+        msg := 'El conductor est├â┬í inactivo en el sistema (ID: ' || wid_user || ')';
+
+        error_code := 'DRIVER_USER_INACTIVE';
+
+        RETURN;
+
+    END IF;
+
+    
+
+    SELECT tab_driver_details.id_card INTO v_driver_card
+
+    FROM tab_driver_details
+
+    WHERE tab_driver_details.id_user = wid_user;
+
+    
+
+    IF v_driver_card IS NULL THEN
+
+        msg := 'No se encontraron detalles del conductor para ID: ' || wid_user;
+
+        error_code := 'DRIVER_DETAILS_NOT_FOUND';
+
+        RETURN;
+
+    END IF;
+
+    
+
+    IF wfull_name IS NULL OR TRIM(wfull_name) = '' THEN
+
+        msg := 'El nombre completo es obligatorio';
+
+        error_code := 'NAME_NULL_EMPTY';
+
+        RETURN;
+
+    END IF;
+
+    
+
+    v_name_clean := TRIM(wfull_name);
+
+    
+
+    IF LENGTH(v_name_clean) < 3 THEN
+
+        msg := 'El nombre debe tener al menos 3 caracteres';
+
+        error_code := 'NAME_TOO_SHORT';
+
+        RETURN;
+
+    END IF;
+
+    
+
+    IF LENGTH(v_name_clean) > 100 THEN
+
+        msg := 'El nombre excede la longitud m├â┬íxima permitida (100 caracteres)';
+
+        error_code := 'NAME_TOO_LONG';
+
+        RETURN;
+
+    END IF;
+
+    
+
+    IF v_name_clean ~ '[0-9$^&*()_+=\[\]{};:"\\|<>?]' THEN
+
+        msg := 'El nombre contiene caracteres no permitidos';
+
+        error_code := 'NAME_INVALID_CHARS';
+
+        RETURN;
+
+    END IF;
+
+    
+
+    v_avatar_clean := NULL;
+
+    
+
+    IF wavatar_url IS NOT NULL AND TRIM(wavatar_url) != '' THEN
+
+        v_avatar_clean := TRIM(wavatar_url);
+
+        
+
+        IF v_avatar_clean !~ '^https?://' THEN
+
+            msg := 'La URL del avatar debe comenzar con http:// o https://';
+
+            error_code := 'AVATAR_INVALID_PROTOCOL';
+
+            RETURN;
+
+        END IF;
+
+        
+
+        IF LENGTH(v_avatar_clean) > 500 THEN
+
+            msg := 'La URL del avatar excede la longitud m├â┬íxima (500 caracteres)';
+
+            error_code := 'AVATAR_TOO_LONG';
+
+            RETURN;
+
+        END IF;
+
+    END IF;
+
+    
+
+    IF wcel IS NULL OR TRIM(wcel) = '' THEN
+
+        msg := 'El tel├â┬®fono es obligatorio';
+
+        error_code := 'PHONE_NULL_EMPTY';
+
+        RETURN;
+
+    END IF;
+
+    
+
+    v_cel_clean := TRIM(wcel);
+
+    
+
+    IF v_cel_clean !~ '^[0-9]{7,15}$' THEN
+
+        msg := 'El tel├â┬®fono debe contener entre 7 y 15 d├â┬¡gitos num├â┬®ricos';
+
+        error_code := 'PHONE_INVALID_FORMAT';
+
+        RETURN;
+
+    END IF;
+
+    
+
+    IF wlicense_cat IS NULL OR TRIM(wlicense_cat) = '' THEN
+
+        msg := 'La categor├â┬¡a de licencia es obligatoria';
+
+        error_code := 'LICENSE_CAT_NULL';
+
+        RETURN;
+
+    END IF;
+
+    
+
+    v_license_clean := UPPER(TRIM(wlicense_cat));
+
+    
+
+    IF v_license_clean NOT IN ('C1', 'C2', 'C3') THEN
+
+        msg := 'Categor├â┬¡a de licencia inv├â┬ílida "' || v_license_clean || '". Debe ser: C1, C2 o C3';
+
+        error_code := 'LICENSE_CAT_INVALID';
+
+        RETURN;
+
+    END IF;
+
+    
+
+    IF wlicense_exp IS NULL THEN
+
+        msg := 'La fecha de expiraci├â┬│n de la licencia es obligatoria';
+
+        error_code := 'LICENSE_EXP_NULL';
+
+        RETURN;
+
+    END IF;
+
+    
+
+    IF wlicense_exp <= CURRENT_DATE THEN
+
+        msg := 'La licencia est├â┬í vencida o expira hoy. Debe ser una fecha futura';
+
+        error_code := 'LICENSE_EXPIRED';
+
+        RETURN;
+
+    END IF;
+
+    
+
+    v_address_clean := NULL;
+
+    
+
+    IF waddress_driver IS NOT NULL AND TRIM(waddress_driver) != '' THEN
+
+        v_address_clean := TRIM(waddress_driver);
+
+        
+
+        IF LENGTH(v_address_clean) > 500 THEN
+
+            msg := 'La direcci├â┬│n excede la longitud m├â┬íxima permitida (500 caracteres)';
+
+            error_code := 'ADDRESS_TOO_LONG';
+
+            RETURN;
+
+        END IF;
+
+    END IF;
+
+    
+
+    IF wavailable IS NULL THEN
+
+        SELECT available INTO v_available_status
+
+        FROM tab_driver_details
+
+        WHERE tab_driver_details.id_user = wid_user;
+
+        
+
+        IF v_available_status IS NULL THEN
+
+            v_available_status := TRUE;
+
+        END IF;
+
+    ELSE
+
+        v_available_status := wavailable;
+
+    END IF;
+
+    
+
+    BEGIN
+
+        UPDATE tab_users 
+
+        SET full_name = v_name_clean,
+
+            avatar_url = v_avatar_clean,
+
+            updated_at = NOW(),
+
+            user_update = wuser_update
+
+        WHERE tab_users.id_user = wid_user;
+
+        
+
+        GET DIAGNOSTICS v_rows_affected = ROW_COUNT;
+
+        
+
+        IF v_rows_affected = 0 THEN
+
+            msg := 'No se pudo actualizar el usuario (ID: ' || wid_user || ')';
+
+            error_code := 'USER_UPDATE_FAILED';
+
+            RETURN;
+
+        END IF;
+
+        
+
+    EXCEPTION
+
+        WHEN not_null_violation THEN
+
+            msg := 'Error de campo obligatorio al actualizar usuario: ' || SQLERRM;
+
+            error_code := 'USER_UPDATE_NOT_NULL_VIOLATION';
+
+            RETURN;
+
+        WHEN check_violation THEN
+
+            msg := 'Error de restricci├â┬│n al actualizar usuario: ' || SQLERRM;
+
+            error_code := 'USER_UPDATE_CHECK_VIOLATION';
+
+            RETURN;
+
+        WHEN OTHERS THEN
+
+            msg := 'Error inesperado al actualizar usuario: ' || SQLERRM;
+
+            error_code := 'USER_UPDATE_ERROR';
+
+            RETURN;
+
+    END;
+
+    
+
+    BEGIN
+
+        UPDATE tab_driver_details 
+
+        SET cel = v_cel_clean,
+
+            license_cat = v_license_clean,
+
+            license_exp = wlicense_exp,
+
+            address_driver = v_address_clean,
+
+            available = v_available_status,
+
+            updated_at = NOW(),
+
+            user_update = wuser_update
+
+        WHERE tab_driver_details.id_user = wid_user;
+
+        
+
+        GET DIAGNOSTICS v_rows_affected = ROW_COUNT;
+
+        
+
+        IF v_rows_affected = 0 THEN
+
+            msg := 'No se pudieron actualizar los detalles del conductor (ID: ' || wid_user || ')';
+
+            error_code := 'DRIVER_DETAILS_UPDATE_FAILED';
+
+            RETURN;
+
+        END IF;
+
+        
+
+    EXCEPTION
+
+        WHEN not_null_violation THEN
+
+            msg := 'Error de campo obligatorio al actualizar detalles: ' || SQLERRM;
+
+            error_code := 'DRIVER_UPDATE_NOT_NULL_VIOLATION';
+
+            RETURN;
+
+        WHEN check_violation THEN
+
+            msg := 'Error de restricci├â┬│n al actualizar detalles: ' || SQLERRM;
+
+            error_code := 'DRIVER_UPDATE_CHECK_VIOLATION';
+
+            RETURN;
+
+        WHEN OTHERS THEN
+
+            msg := 'Error inesperado al actualizar detalles: ' || SQLERRM;
+
+            error_code := 'DRIVER_UPDATE_ERROR';
+
+            RETURN;
+
+    END;
+
+    
+
+    success := TRUE;
+
+    msg := 'Conductor actualizado exitosamente: ' || v_name_clean;
+
+    
+
+    IF NOT v_available_status THEN
+
+        msg := msg || ' (Disponibilidad: NO DISPONIBLE)';
+
+    ELSE
+
+        msg := msg || ' (Disponibilidad: DISPONIBLE)';
+
+    END IF;
+
+    
+
+    error_code := NULL;
+
+    id_user := wid_user;
+
+    id_card := v_driver_card;
+
+    
+
+    RETURN;
+
+END;
+
+$function$
+

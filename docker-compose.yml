@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  osrm:
+    image: osrm/osrm-backend
+    container_name: osrm-bucarabus
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - osrm-bucaramanga-vol:/data
+    command: "osrm-routed --algorithm mld /data/bucaramanga.osrm"
+
+  photon:
+    build: ./photon
+    container_name: photon-bucarabus
+    restart: unless-stopped
+    ports:
+      - "8080:2322"
+    volumes:
+      - photon-bucarabus-vol:/photon/photon_data
+
+  tileserver:
+    build: ./tiles
+    container_name: tiles-bucarabus
+    restart: unless-stopped
+    ports:
+      - "8085:8080"
+    volumes:
+      - tiles-bucarabus-vol:/data
+
+volumes:
+  osrm-bucaramanga-vol:
+    external: true
+  photon-bucarabus-vol:
+    external: true
+  tiles-bucarabus-vol:
+    external: true

@@ -1,0 +1,54 @@
+Aquí tienes las opciones de tiles para el mapa, solo cambia la línea del `L.tileLayer`:
+
+---
+
+### 🗺️ Opciones claras (recomendadas)
+
+**1. CartoDB Positron** ← actual
+```javascript
+'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+```
+
+**2. CartoDB Voyager** — colores suaves con etiquetas
+```javascript
+'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+```
+
+**3. OpenStreetMap estándar** — clásico colorido
+```javascript
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+```
+
+**4. Stadia Alidade Smooth** — muy limpio y moderno
+```javascript
+'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'
+```
+
+**5. Stadia OSM Bright** — brillante con buenos contrastes
+```javascript
+'https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png'
+```
+
+---
+
+### 🌙 Opciones oscuras
+
+**6. CartoDB Dark Matter** — fondo negro
+```javascript
+'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+```
+
+**7. Stadia Alidade Smooth Dark**
+```javascript
+'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
+```
+
+---
+
+Para cambiar, reemplaza en las **dos funciones** `initMap()` y `refreshTiles()` del archivo:
+
+````html
+// ...existing code...
+baseTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+// ...existing code...
+````

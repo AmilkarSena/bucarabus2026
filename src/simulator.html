@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚌 BucaraBUS — Simulador GPS</title>
+  <link rel="stylesheet" href="/lib/leaflet/leaflet.css" />
+  <script src="/lib/leaflet/leaflet.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ─── HEADER ─── */
+    #header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 20px; background: #1e293b; border-bottom: 1px solid #334155;
+      flex-shrink: 0; gap: 12px; flex-wrap: wrap;
+    }
+    #header h1 { font-size: 18px; font-weight: 700; color: #67e8f9; white-space: nowrap; }
+    #ws-status { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #6b7280; }
+    .dot.connected { background: #10b981; box-shadow: 0 0 6px #10b981; animation: pulse 2s infinite; }
+    .dot.error { background: #f43f5e; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    #header-btns { display: flex; gap: 8px; }
+    .btn { padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .2s; }
+    .btn-primary { background: #3b82f6; color: white; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-success { background: #10b981; color: white; }
+    .btn-success:hover { background: #059669; }
+    .btn-danger { background: #f43f5e; color: white; }
+    .btn-danger:hover { background: #e11d48; }
+    .btn-gray { background: #334155; color: #cbd5e1; }
+    .btn-gray:hover { background: #475569; }
+    #speed-global { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    #speed-global label { color: #94a3b8; white-space: nowrap; }
+    #speed-global select { background: #334155; color: #e2e8f0; border: 1px solid #475569; border-radius: 6px; padding: 4px 8px; font-size: 13px; cursor: pointer; }
+
+    /* ─── MAIN LAYOUT ─── */
+    #main { display: flex; flex: 1; overflow: hidden; }
+
+    /* ─── SIDEBAR ─── */
+    #sidebar {
+      width: 320px; min-width: 280px; background: #1e293b; border-right: 1px solid #334155;
+      display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0;
+    }
+    #sidebar-tabs { display: flex; border-bottom: 1px solid #334155; }
+    .tab-btn {
+      flex: 1; padding: 10px 6px; background: none; border: none; color: #94a3b8;
+      font-size: 12px; font-weight: 600; cursor: pointer; text-transform: uppercase;
+      letter-spacing: .5px; border-bottom: 2px solid transparent; transition: all .2s;
+    }
+    .tab-btn.active { color: #67e8f9; border-bottom-color: #67e8f9; }
+    .tab-content { display: none; flex: 1; overflow-y: auto; }
+    .tab-content.active { display: flex; flex-direction: column; }
+
+    /* Scrollbar */
+    .tab-content::-webkit-scrollbar { width: 4px; }
+    .tab-content::-webkit-scrollbar-track { background: #1e293b; }
+    .tab-content::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+
+    /* ─── BUS CARD ─── */
+    .bus-card {
+      padding: 14px; border-bottom: 1px solid #334155; transition: background .2s;
+    }
+    .bus-card:hover { background: #263347; }
+    .bus-card.paused { opacity: .7; }
+    .bus-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .bus-plate { font-size: 15px; font-weight: 700; color: #f1f5f9; display: flex; align-items: center; gap: 6px; }
+    .bus-plate .icon { font-size: 18px; }
+    .route-badge { font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: 700; }
+    .bus-driver { font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
+    .progress-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .progress-bar-wrap { flex: 1; height: 6px; background: #334155; border-radius: 4px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 4px; transition: width .5s ease; }
+    .progress-pct { font-size: 12px; font-weight: 700; color: #67e8f9; min-width: 36px; text-align: right; }
+    .trips-label { font-size: 11px; color: #64748b; margin-bottom: 8px; }
+    .bus-controls { display: flex; align-items: center; gap: 8px; }
+    .ctrl-btn { width: 28px; height: 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+    .ctrl-pause { background: #334155; color: #fbbf24; }
+    .ctrl-pause:hover { background: #fbbf24; color: #1e293b; }
+    .ctrl-reset { background: #334155; color: #94a3b8; }
+    .ctrl-reset:hover { background: #475569; }
+    .ctrl-locate { background: #334155; color: #67e8f9; }
+    .ctrl-locate:hover { background: #67e8f9; color: #1e293b; }
+    .speed-select { flex: 1; background: #334155; color: #e2e8f0; border: 1px solid #475569; border-radius: 6px; padding: 3px 6px; font-size: 12px; cursor: pointer; }
+    .dragging-label { font-size: 11px; color: #fbbf24; margin-top: 4px; display: none; }
+    .bus-card.dragging .dragging-label { display: block; }
+
+    /* ─── DRIVER INTERFACE TOGGLES ─── */
+    .driver-toggles { background: #0f172a; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .driver-toggles-title { font-size: 10px; text-transform: uppercase; letter-spacing: .6px; color: #475569; margin-bottom: 2px; }
+    .toggle-row { display: flex; align-items: center; gap: 8px; }
+    .toggle-icon { font-size: 14px; width: 20px; text-align: center; }
+    .toggle-label { font-size: 12px; color: #94a3b8; flex: 1; }
+    .toggle-switch { position: relative; display: inline-block; width: 44px; height: 22px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #475569; border-radius: 22px; transition: .25s; }
+    .toggle-slider::before { position: absolute; content: ''; height: 16px; width: 16px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .25s; }
+    input:checked + .toggle-slider { background: #10b981; }
+    input:checked + .toggle-slider::before { transform: translateX(22px); }
+    .toggle-state { font-size: 11px; font-weight: 600; color: #10b981; min-width: 72px; text-align: right; }
+    .toggle-state.off { color: #ef4444; }
+    /* Botón terminar turno */
+    .turno-btn { width: 100%; padding: 10px 0; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 4px; transition: all .2s; letter-spacing: .3px; }
+    .turno-end { background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; }
+    .turno-end:hover:not(:disabled) { background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 4px 12px rgba(220,38,38,.4); }
+    .turno-end:disabled { opacity: .4; cursor: not-allowed; }
+    /* Botón iniciar turno en tab de programados */
+    .btn-start-trip { background: #10b981; color: white; border: none; border-radius: 6px; padding: 5px 10px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+    .btn-start-trip:hover { background: #059669; }
+    .btn-start-trip.early { background: #334155; color: #64748b; cursor: not-allowed; }
+    .btn-start-trip.expired { background: #3f1212; color: #f87171; cursor: not-allowed; }
+    .btn-reactivate { background: #92400e; color: #fcd34d; border: none; border-radius: 6px; padding: 5px 10px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+    .btn-reactivate:hover { background: #b45309; }
+
+    /* ─── TRIPS TABLE ─── */
+    #trips-section { padding: 12px; }
+    #trips-section h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: #64748b; margin-bottom: 10px; }
+    .trip-row { padding: 10px; border-radius: 8px; background: #263347; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+    .trip-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .trip-info { flex: 1; min-width: 0; }
+    .trip-plate { font-weight: 700; font-size: 13px; }
+    .trip-route { font-size: 11px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .trip-time { font-size: 11px; color: #64748b; white-space: nowrap; }
+    .trip-status-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; white-space: nowrap; }
+    .status-1 { background: #1e3a5f; color: #93c5fd; }   /* pendiente */
+    .status-2 { background: #1e3a2f; color: #6ee7b7; }   /* asignado */
+    .status-3 { background: #1a2e1a; color: #4ade80; }   /* activo */
+    .status-4 { background: #2d2d2d; color: #94a3b8; }   /* completado */
+
+    /* ─── COORDINATES INFO ─── */
+    #coord-bar {
+      position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: rgba(15,23,42,.92); border: 1px solid #334155; border-radius: 10px;
+      padding: 8px 16px; font-size: 13px; font-weight: 600; color: #67e8f9;
+      pointer-events: none; z-index: 1000; white-space: nowrap;
+      display: none; backdrop-filter: blur(4px);
+    }
+
+    /* ─── MAP ─── */
+    #map-wrap { flex: 1; position: relative; }
+    #map { width: 100%; height: 100%; }
+
+    /* ─── EMPTY STATE ─── */
+    .empty-state { padding: 30px 20px; text-align: center; color: #475569; font-size: 13px; }
+    .empty-state .icon { font-size: 36px; margin-bottom: 10px; }
+
+    /* ─── BUS MARKER ─── */
+    .bus-marker-icon {
+      background: none; border: none;
+    }
+    .bus-gps-marker {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .bus-marker-body {
+      width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 16px; border: 3px solid white; /* border-color se sobreescribe inline con el color de ruta */
+      box-shadow: 0 2px 8px rgba(0,0,0,.6); cursor: grab; transition: transform .1s;
+    }
+    .bus-marker-body:active { cursor: grabbing; transform: scale(1.2); }
+    .bus-marker-body.sim-paused { opacity: .6; filter: grayscale(.6); }
+    .bus-amb-label {
+      background: rgba(15,23,42,0.85); color: #fff; font-size: 9px; font-weight: 700;
+      padding: 1px 4px; border-radius: 3px; white-space: nowrap; letter-spacing: 0.4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.5);
+    }
+    /* Marcador bus programado (no activo) */
+    .sched-marker-body {
+      width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 16px; border: 2px dashed white;
+      box-shadow: 0 1px 4px rgba(0,0,0,.4); opacity: .75; background: #475569;
+    }
+
+    /* ─── LOADING ─── */
+    #loading-overlay {
+      position: absolute; inset: 0; background: rgba(15,23,42,.85); z-index: 2000;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px; font-size: 16px; color: #94a3b8;
+    }
+    .spinner { width: 40px; height: 40px; border: 3px solid #334155; border-top-color: #3b82f6; border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <h1>🚌 BucaraBUS · Simulador GPS</h1>
+
+  <div id="ws-status">
+    <div class="dot" id="ws-dot"></div>
+    <span id="ws-label">Conectando...</span>
+  </div>
+
+  <div id="speed-global">
+    <label>Velocidad global:</label>
+    <select id="global-speed-select" onchange="setGlobalSpeed(this.value)">
+      <option value="0.5">0.5×</option>
+      <option value="1" selected>1×</option>
+      <option value="2">2×</option>
+      <option value="5">5×</option>
+      <option value="10">10×</option>
+    </select>
+  </div>
+
+  <div id="header-btns">
+    <button class="btn btn-success" onclick="resumeAll()">▶ Reanudar todo</button>
+    <button class="btn btn-danger"  onclick="pauseAll()">⏸ Pausar todo</button>
+    <button class="btn btn-primary" onclick="loadShifts()">🔄 Actualizar</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div id="sidebar-tabs">
+      <button class="tab-btn active" onclick="switchTab('buses')">🚌 Buses activos</button>
+      <button class="tab-btn" onclick="switchTab('trips')">📋 Programados</button>
+    </div>
+
+    <!-- TAB: Buses activos -->
+    <div class="tab-content active" id="tab-buses">
+      <div id="buses-list"></div>
+    </div>
+
+    <!-- TAB: Turnos programados (todos hoy) -->
+    <div class="tab-content" id="tab-trips">
+      <div id="trips-section">
+        <h3>Viajes de hoy</h3>
+        <div id="trips-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div id="map-wrap">
+    <div id="loading-overlay">
+      <div class="spinner"></div>
+      <span>Cargando mapa y turnos...</span>
+    </div>
+    <div id="map"></div>
+    <div id="coord-bar">📍 Lat: — · Lng: —</div>
+  </div>
+</div>
+
+<!-- Socket.io desde el servidor -->
+<script src="http://localhost:3001/socket.io/socket.io.js"></script>
+<script>
+// ════════════════════════════════════════
+// CONFIGURACIÓN
+// ════════════════════════════════════════
+const API_BASE  = 'http://localhost:3001/api';
+const WS_URL    = 'http://localhost:3001';
+const TILE_URL  = 'http://localhost:8085'; // TileServer GL local (cambia en producción)
+const TICK_MS   = 150;          // intervalo del loop de simulación (ms)
+const STEP_PER_TICK = 0.15;    // % de avance por tick a velocidad 1×
+const BUCARAMANGA = [7.119349, -73.122742];
+
+// ════════════════════════════════════════
+// ESTADO GLOBAL
+// ════════════════════════════════════════
+let map, socket, baseTile;
+let buses          = {};  // { plateNumber: { shift, marker, routeLine, paused, speed, progress, trips, dragging } }
+let allTrips       = [];
+let allRoutesMap   = {};  // { id_route: { name, color, path (leaflet coords [[lat,lng]...]) } }
+let bgRouteLines   = {};  // { id_route: L.polyline }  — todas las rutas en el mapa (fondo)
+let schedMarkers   = {};  // { plate_number: L.marker } — buses programados (no activos)
+let globalSpeed = 1;
+let simInterval = null;
+
+// ════════════════════════════════════════
+// MAPA
+// ════════════════════════════════════════
+function initMap() {
+  map = L.map('map', { zoomControl: true }).setView(BUCARAMANGA, 13);
+
+  const CARTO_URL = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
+  const SERVICE_BOUNDS = L.latLngBounds([6.88, -73.38], [7.62, -72.90]);
+  const tileOptions = {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    subdomains: 'abcd',
+    minZoom: 10,
+    maxZoom: 18,
+    updateWhenZooming: false,
+    updateWhenIdle: true,
+    keepBuffer: 2,
+    detectRetina: false
+  };
+
+  // Intentar tiles locales, con fallback automático a CartoDB.
+  // bounds: restringe al área del .mbtiles. Solo cambia a CartoDB tras 5 errores en 10s.
+  let switched = false;
+  let errorCount = 0;
+  let errorTimer = null;
+  baseTile = L.tileLayer(`${TILE_URL}/styles/positron/{z}/{x}/{y}.png`, { ...tileOptions, bounds: SERVICE_BOUNDS }).addTo(map);
+  baseTile.on('tileerror', () => {
+    if (switched) return;
+    errorCount++;
+    if (!errorTimer) {
+      errorTimer = setTimeout(() => { errorCount = 0; errorTimer = null; }, 10000);
+    }
+    if (errorCount >= 5) {
+      if (!navigator.onLine) {
+        console.warn('⚠️ Errores de tiles detectados, pero el navegador está OFFLINE. Manteniendo servidor local.');
+        errorCount = 0;
+        return;
+      }
+      switched = true;
+      clearTimeout(errorTimer);
+      console.warn('⚠️ Tile server local no responde (5 errores), cambiando a CartoDB...');
+      baseTile.remove();
+      baseTile = L.tileLayer(CARTO_URL, tileOptions).addTo(map);
+    }
+  });
+
+  // Mostrar coordenadas al mover el mouse
+  map.on('mousemove', e => {
+    const bar = document.getElementById('coord-bar');
+    bar.style.display = 'block';
+    bar.textContent = `📍 Lat: ${e.latlng.lat.toFixed(6)}  ·  Lng: ${e.latlng.lng.toFixed(6)}`;
+  });
+  map.on('mouseout', () => {
+    document.getElementById('coord-bar').style.display = 'none';
+  });
+}
+
+// ════════════════════════════════════════
+// WEBSOCKET
+// ════════════════════════════════════════
+function initSocket() {
+  socket = io(WS_URL, { transports: ['websocket'], reconnection: true });
+  socket.on('connect',    () => setWsStatus(true));
+  socket.on('disconnect', () => setWsStatus(false));
+  socket.on('connect_error', () => setWsStatus(false, true));
+}
+
+function setWsStatus(ok, err = false) {
+  const dot = document.getElementById('ws-dot');
+  const lbl = document.getElementById('ws-label');
+  dot.className = 'dot' + (ok ? ' connected' : err ? ' error' : '');
+  lbl.textContent = ok ? 'Conectado' : err ? 'Error de conexión' : 'Desconectado';
+}
+
+// ════════════════════════════════════════
+// CARGA DE TURNOS ACTIVOS
+// ════════════════════════════════════════
+async function loadShifts() {
+  try {
+    const res = await fetch(`${API_BASE}/shifts`);
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error);
+    const shifts = json.data;
+
+    // Eliminar buses que ya no están
+    const newPlates = new Set(shifts.map(s => s.plate_number));
+    for (const plate of Object.keys(buses)) {
+      if (!newPlates.has(plate)) removeBus(plate);
+    }
+
+    // Agregar / actualizar — solo viajes ACTIVOS (status 3) se animan en el mapa
+    // Los pendientes/asignados aparecen en el tab "Programados" y esperan el botón Iniciar
+    for (const shift of shifts) {
+      if (shift.status_trip !== 3) continue;
+      if (!buses[shift.plate_number]) {
+        addBus(shift);
+      } else {
+        // Actualizar datos sin resetear progreso
+        buses[shift.plate_number].shift = shift;
+      }
+    }
+
+    renderBusesList();
+    document.getElementById('loading-overlay').style.display = 'none';
+  } catch (e) {
+    console.error('Error cargando turnos:', e);
+    document.getElementById('loading-overlay').innerHTML =
+      `<div style="color:#f43f5e;font-size:15px">❌ No se pudo conectar a la API<br><small>${e.message}</small></div>
+       <button class="btn btn-primary" onclick="loadShifts()" style="margin-top:12px">Reintentar</button>`;
+  }
+}
+
+// ─── Cargar todas las rutas y dibujarlas como fondo en el mapa ───
+async function loadRoutes() {
+  try {
+    const res  = await fetch(`${API_BASE}/routes`);
+    const json = await res.json();
+    if (!json.success) return;
+
+    // Limpiar líneas antiguas
+    for (const l of Object.values(bgRouteLines)) map.removeLayer(l);
+    bgRouteLines = {};
+    allRoutesMap  = {};
+
+    for (const r of json.data) {
+      // Reutilizar getCoords para detectar automáticamente el orden de coordenadas
+      const latlngs = getCoords({ coordinates: r.path || [] });
+      if (latlngs.length < 2) continue;
+
+      allRoutesMap[r.id] = { name: r.name, color: r.color || '#64748b', path: latlngs };
+
+      const line = L.polyline(latlngs, {
+        color: r.color || '#64748b',
+        weight: 3,
+        opacity: 0, // Oculta por defecto
+        dashArray: '6 4'
+      }).addTo(map);
+
+      line.bindTooltip(r.name || `Ruta ${r.id}`, { sticky: true, opacity: .85 });
+      bgRouteLines[r.id] = line;
+    }
+    console.log(`🗺️  ${Object.keys(allRoutesMap).length} rutas dibujadas en el mapa`);
+  } catch (e) { console.warn('No se pudieron cargar rutas:', e.message); }
+}
+
+// ─── Cargar todos los viajes del día y marcar programados en el mapa ───
+async function loadAllTrips() {
+  try {
+    const res  = await fetch(`${API_BASE}/shifts/debug/all`);
+    const json = await res.json();
+    if (!json.success) return;
+    allTrips = json.data;
+
+    // Resaltar rutas con turnos programados y poner marcadores
+    // Limpiar marcadores de programados anteriores
+    for (const m of Object.values(schedMarkers)) map.removeLayer(m);
+    schedMarkers = {};
+
+    // Resetear opacidad de todas las rutas de fondo (ocultarlas todas primero)
+    for (const [rid, line] of Object.entries(bgRouteLines)) {
+      line.setStyle({ opacity: 0, weight: 3, dashArray: '6 4' });
+    }
+
+    // Placas de buses ACTIVOS (ya tienen marcador animado)
+    const activePlates = new Set(Object.keys(buses));
+
+    for (const trip of allTrips) {
+      const rid    = trip.id_route;
+      const plate  = trip.plate_number;
+      const status = trip.id_status || trip.status_trip;
+      const color  = trip.color_route || allRoutesMap[rid]?.color || '#3b82f6';
+
+      // Resaltar la ruta de fondo SOLO si el viaje está ACTIVO (status 3)
+      if (status === 3 && bgRouteLines[rid]) {
+        bgRouteLines[rid].setStyle({ opacity: 0.7, weight: 4, dashArray: null });
+      }
+
+      // Marcador estático para buses programados (status 1 o 2) que NO estén ya activos
+      if ((status === 1 || status === 2) && !activePlates.has(plate) && !schedMarkers[plate]) {
+        const routeData = allRoutesMap[rid];
+        if (routeData && routeData.path.length > 0) {
+          const startPos = routeData.path[0];
+          const icon = L.divIcon({
+            html: `<div class="sched-marker-body" style="border-color:${color}" title="${plate} — ${trip.name_route||''}\n${fmtTime(trip.start_time)} hs">🚌</div>`,
+            className: 'bus-marker-icon',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+          });
+          const m = L.marker(startPos, { icon, zIndexOffset: 500 }).addTo(map);
+          m.bindPopup(`
+            <b>🚌 ${plate}</b> <span style='color:#94a3b8;font-size:11px'>(Programado)</span><br>
+            <span style='color:#64748b'>${trip.name_route || `Ruta ${rid}`}</span><br>
+            <hr style='margin:4px 0;border-color:#e2e8f0'>
+            👤 ${trip.name_driver || 'Sin conductor'}<br>
+            ⏰ ${fmtTime(trip.start_time)} – ${fmtTime(trip.end_time)}
+          `);
+          schedMarkers[plate] = m;
+        }
+      }
+    }
+
+    renderTripsList();
+  } catch (e) { console.warn('No se pudo cargar viajes del día:', e.message); }
+}
+
+// ════════════════════════════════════════
+// BUS: AGREGAR / ELIMINAR
+// ════════════════════════════════════════
+function addBus(shift) {
+  const path = getCoords(shift.path_route);
+  const color = shift.color_route || '#3b82f6';
+
+  // Dibujar polyline de la ruta
+  let routeLine = null;
+  if (path.length > 0) {
+    routeLine = L.polyline(path, { color, weight: 4, opacity: 0.7 }).addTo(map);
+  }
+
+  // Marcador arrastrable
+  const progress = shift.progress_percentage || 0;
+  const pos = interpolatePoint(path, progress) || BUCARAMANGA;
+
+  const icon = makeBusIcon(shift.plate_number, color, shift.amb_code);
+  const marker = L.marker(pos, { icon, draggable: true, zIndexOffset: 1000 }).addTo(map);
+
+  // Popup
+  marker.bindPopup('', { maxWidth: 250 });
+  marker.on('click', () => {
+    updatePopup(shift.plate_number);
+    marker.openPopup();
+  });
+
+  // Drag: arrastrar el bus manualmente
+  const stopDragging = (latlng) => {
+    const b = buses[shift.plate_number];
+    if (!b) return;
+    clearTimeout(b._dragSafetyTimeout);
+    b._dragSafetyTimeout = null;
+    b.dragging = false;
+    if (latlng) {
+      const nearest = nearestProgress(path, [latlng.lat, latlng.lng]);
+      if (nearest !== null) b.progress = nearest;
+    }
+    const card = document.getElementById(`card-${cssId(shift.plate_number)}`);
+    if (card) card.classList.remove('dragging');
+    const lbl = document.getElementById(`drag-lbl-${cssId(shift.plate_number)}`);
+    if (lbl) lbl.textContent = '';
+  };
+
+  marker.on('dragstart', () => {
+    const b = buses[shift.plate_number];
+    if (!b) return;
+    b.dragging = true;
+    // Timeout de seguridad: si dragend no llega (mouse fuera del mapa), resetear igual
+    clearTimeout(b._dragSafetyTimeout);
+    b._dragSafetyTimeout = setTimeout(() => stopDragging(marker.getLatLng()), 8000);
+    const card = document.getElementById(`card-${cssId(shift.plate_number)}`);
+    if (card) card.classList.add('dragging');
+  });
+  marker.on('drag', (e) => {
+    const { lat, lng } = e.latlng;
+    const lbl = document.getElementById(`drag-lbl-${cssId(shift.plate_number)}`);
+    if (lbl) lbl.textContent = `📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    emitLocation(shift.plate_number, shift.id_route, lat, lng, 0);
+  });
+  marker.on('dragend', (e) => stopDragging(e.latlng));
+
+  buses[shift.plate_number] = {
+    shift,
+    marker,
+    routeLine,
+    path,
+    paused: false,
+    speed: 1,
+    progress,
+    trips: Number(shift.trips_completed) || 0,
+    dragging: false,
+    _dragSafetyTimeout: null,
+    gpsActive: true,
+    sysActive: true,
+    wsActive: true
+  };
+}
+
+function removeBus(plate) {
+  const b = buses[plate];
+  if (!b) return;
+  clearTimeout(b._dragSafetyTimeout);
+  if (b.marker)    map.removeLayer(b.marker);
+  if (b.routeLine) map.removeLayer(b.routeLine);
+  delete buses[plate];
+}
+
+// ════════════════════════════════════════
+// LOOP DE SIMULACIÓN
+// ════════════════════════════════════════
+function startSimLoop() {
+  if (simInterval) clearInterval(simInterval);
+  simInterval = setInterval(simTick, TICK_MS);
+}
+
+function simTick() {
+  for (const [plate, b] of Object.entries(buses)) {
+    if (b.paused || b.dragging || b.path.length === 0) continue;
+
+    const step = STEP_PER_TICK * b.speed * globalSpeed;
+    b.progress += step;
+
+    if (b.progress >= 100) {
+      b.progress = 0;
+      b.trips += 1;
+      console.log(`🎉 ${plate} completó viaje #${b.trips}`);
+      pushProgressToAPI(plate, 0, b.trips);
+    }
+
+    const progRound = Math.round(b.progress);
+    const pos = interpolatePoint(b.path, b.progress);
+    if (!pos) continue;
+
+    // Mover marcador
+    b.marker.setLatLng(pos);
+
+    // WS
+    emitLocation(plate, b.shift.id_route, pos[0], pos[1], 30 * b.speed * globalSpeed);
+
+    // Actualizar UI (no cada tick para ahorrar DOM)
+    if (Math.abs(progRound - (b.lastUIProgress || -1)) >= 1) {
+      b.lastUIProgress = progRound;
+      updateBusUI(plate, progRound, b.trips);
+    }
+
+    // Push a API cada 5%
+    if (Math.abs(progRound - (b.lastAPIPush || -10)) >= 5) {
+      b.lastAPIPush = progRound;
+      pushProgressToAPI(plate, progRound, b.trips);
+    }
+  }
+}
+
+// ════════════════════════════════════════
+// API / WS HELPERS
+// ════════════════════════════════════════
+function emitLocation(plate, routeId, lat, lng, speed) {
+  if (!socket?.connected) return;
+  const b = buses[plate];
+  if (b && (!b.gpsActive || !b.wsActive)) return; // GPS apagado o WS desconectado
+  socket.emit('bus-location', {
+    plateNumber: plate, plate, routeId, lat, lng, speed, simulated: true
+  });
+}
+
+async function pushProgressToAPI(plate, progress, trips) {
+  const b = buses[plate];
+  if (b && !b.sysActive) return; // Sin conexión al sistema
+  try {
+    await fetch(`${API_BASE}/shifts/${encodeURIComponent(plate)}/progress`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ progress, trips_completed: trips })
+    });
+  } catch (e) { /* silencioso */ }
+}
+
+// ════════════════════════════════════════
+// CONTROLES
+// ════════════════════════════════════════
+function togglePause(plate) {
+  const b = buses[plate];
+  if (!b) return;
+  b.paused = !b.paused;
+  const card = document.getElementById(`card-${cssId(plate)}`);
+  if (card) {
+    card.classList.toggle('paused', b.paused);
+    const btn = card.querySelector('.ctrl-pause');
+    if (btn) btn.textContent = b.paused ? '▶' : '⏸';
+    btn.title = b.paused ? 'Reanudar' : 'Pausar';
+  }
+  updateMarkerStyle(plate);
+}
+
+function resetBus(plate) {
+  const b = buses[plate];
+  if (!b) return;
+  b.progress = 0;
+  b.trips = 0;
+  b.lastAPIPush = -10;
+  pushProgressToAPI(plate, 0, 0);
+  updateBusUI(plate, 0, 0);
+  const pos = interpolatePoint(b.path, 0);
+  if (pos) b.marker.setLatLng(pos);
+}
+
+function setBusSpeed(plate, val) {
+  const b = buses[plate];
+  if (b) b.speed = parseFloat(val);
+}
+
+function locateBus(plate) {
+  const b = buses[plate];
+  if (!b) return;
+  const pos = b.marker.getLatLng();
+  map.flyTo(pos, 16, { duration: 1 });
+  b.marker.openPopup();
+  updatePopup(plate);
+}
+
+function pauseAll()  { Object.keys(buses).forEach(p => { if (!buses[p].paused) togglePause(p); }); }
+function resumeAll() { Object.keys(buses).forEach(p => { if (buses[p].paused)  togglePause(p); }); }
+function setGlobalSpeed(val) { globalSpeed = parseFloat(val); }
+
+// ════════════════════════════════════════
+// CONTROLES CONDUCTOR
+// ════════════════════════════════════════
+function toggleGPS(plate, on) {
+  const b = buses[plate]; if (!b) return;
+  b.gpsActive = on;
+  const el = document.getElementById(`gps-st-${cssId(plate)}`);
+  if (el) { el.textContent = on ? 'Activo' : 'Apagado'; el.className = `toggle-state${on ? '' : ' off'}`; }
+  console.log(`📡 ${plate}: GPS ${on ? 'ON ✅' : 'OFF ❌'}`);
+}
+
+function toggleSys(plate, on) {
+  const b = buses[plate]; if (!b) return;
+  b.sysActive = on;
+  const el = document.getElementById(`sys-st-${cssId(plate)}`);
+  if (el) { el.textContent = on ? 'Conectado' : 'Sin conexión'; el.className = `toggle-state${on ? '' : ' off'}`; }
+  console.log(`🌐 ${plate}: Sistema ${on ? 'ON ✅' : 'OFF ❌'}`);
+}
+
+function toggleWS(plate, on) {
+  const b = buses[plate]; if (!b) return;
+  b.wsActive = on;
+  const el = document.getElementById(`ws-st-${cssId(plate)}`);
+  if (el) { el.textContent = on ? 'En línea' : 'Desconectado'; el.className = `toggle-state${on ? '' : ' off'}`; }
+  console.log(`🔌 ${plate}: WebSocket ${on ? 'ON ✅' : 'OFF ❌'}`);
+}
+
+async function startTrip(idTrip, plate) {
+  if (!idTrip) return;
+  const trip = allTrips.find(t => t.id_trip === idTrip);
+  if (trip) {
+    const ts = getTripTimeStatus(trip);
+    if (!ts.ok) { alert(ts.reason === 'early'
+      ? `⏳ Este turno aún no ha comenzado.\nHora de inicio: ${fmtTime(trip.start_time)}`
+      : `✕ Este turno ya venció.\nHora fin era: ${fmtTime(trip.end_time)}`
+    ); return; }
+  }
+  try {
+    const res  = await fetch(`${API_BASE}/trips/${idTrip}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status_trip: 3 })
+    });
+    const json = await res.json();
+    if (json.success) {
+      console.log(`✅ Turno iniciado: ${plate} (trip ${idTrip})`);
+      await loadShifts();
+      await loadAllTrips();
+    } else { alert(`No se pudo iniciar el turno: ${json.msg || json.error || json.message || 'Error desconocido'}`); }
+  } catch(e) { alert(`Error: ${e.message}`); }
+}
+
+async function reactivateTrip(idTrip, plate) {
+  if (!idTrip) return;
+  const trip = allTrips.find(t => t.id_trip === idTrip);
+  if (trip && !getTripTimeStatus(trip).ok) {
+    alert('✕ El horario del turno ya terminó, no se puede reactivar.');
+    return;
+  }
+  if (!confirm(`¿Reactivar el turno de ${plate}?\nEl bus volverá a aparecer como activo.`)) return;
+  try {
+    const res  = await fetch(`${API_BASE}/trips/${idTrip}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status_trip: 3 })
+    });
+    const json = await res.json();
+    if (json.success) {
+      console.log(`↩ Turno reactivado: ${plate} (trip ${idTrip})`);
+      await loadShifts();
+      await loadAllTrips();
+    } else { alert(`No se pudo reactivar: ${json.msg || json.error || json.message || 'Error desconocido'}`); }
+  } catch(e) { alert(`Error: ${e.message}`); }
+}
+
+async function endTrip(plate, idTrip) {
+  if (!idTrip) { alert('ID de viaje no disponible'); return; }
+  if (!confirm(`¿Terminar el turno de ${plate}?`)) return;
+  try {
+    const b = buses[plate];
+    if (b) { b.sysActive = true; await pushProgressToAPI(plate, 100, b.trips); }
+    const res  = await fetch(`${API_BASE}/trips/${idTrip}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status_trip: 4 })
+    });
+    const json = await res.json();
+    if (json.success) {
+      console.log(`🏁 Turno terminado: ${plate}`);
+      removeBus(plate);
+      renderBusesList();
+      await loadAllTrips();
+    } else { alert(`Error al terminar turno: ${json.msg || json.error || json.message || 'Error desconocido'}`); }
+  } catch(e) { alert(`Error: ${e.message}`); }
+}
+
+// ════════════════════════════════════════
+// RENDER UI
+// ════════════════════════════════════════
+function renderBusesList() {
+  const cont = document.getElementById('buses-list');
+  if (Object.keys(buses).length === 0) {
+    cont.innerHTML = `<div class="empty-state"><div class="icon">🚍</div>No hay buses activos en este momento</div>`;
+    return;
+  }
+  cont.innerHTML = '';
+  for (const [plate, b] of Object.entries(buses)) {
+    const { shift } = b;
+    const color = shift.color_route || '#3b82f6';
+    const id = cssId(plate);
+    const tripId = shift.id_trip || '';
+    cont.innerHTML += `
+      <div class="bus-card" id="card-${id}">
+        <!-- Header -->
+        <div class="bus-card-header">
+          <div class="bus-plate"><span class="icon">🚌</span>${plate}</div>
+          <span class="route-badge" style="background:${color}22;color:${color}">${shift.name_route || `Ruta ${shift.id_route}`}</span>
+        </div>
+        <div class="bus-driver">👤 ${shift.name_driver || 'Sin conductor'} &nbsp;·&nbsp; ⏰ ${fmtTime(shift.start_time)}–${fmtTime(shift.end_time)}</div>
+        <!-- Progreso -->
+        <div class="progress-row">
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="pbar-${id}" style="width:${b.progress}%;background:${color}"></div>
+          </div>
+          <div class="progress-pct" id="ppct-${id}">${Math.round(b.progress)}%</div>
+        </div>
+        <div class="trips-label" id="trips-${id}">🔁 Viajes completados: ${b.trips}</div>
+        <!-- Interruptores del conductor -->
+        <div class="driver-toggles">
+          <div class="driver-toggles-title">Estado del dispositivo</div>
+          <div class="toggle-row">
+            <span class="toggle-icon">📡</span>
+            <span class="toggle-label">GPS</span>
+            <label class="toggle-switch">
+              <input type="checkbox" ${b.gpsActive ? 'checked' : ''} onchange="toggleGPS('${plate}', this.checked)">
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-state${b.gpsActive ? '' : ' off'}" id="gps-st-${id}">${b.gpsActive ? 'Activo' : 'Apagado'}</span>
+          </div>
+          <div class="toggle-row">
+            <span class="toggle-icon">🌐</span>
+            <span class="toggle-label">Sistema</span>
+            <label class="toggle-switch">
+              <input type="checkbox" ${b.sysActive ? 'checked' : ''} onchange="toggleSys('${plate}', this.checked)">
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-state${b.sysActive ? '' : ' off'}" id="sys-st-${id}">${b.sysActive ? 'Conectado' : 'Sin conexión'}</span>
+          </div>
+          <div class="toggle-row">
+            <span class="toggle-icon">🔌</span>
+            <span class="toggle-label">WebSocket</span>
+            <label class="toggle-switch">
+              <input type="checkbox" ${b.wsActive ? 'checked' : ''} onchange="toggleWS('${plate}', this.checked)">
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-state${b.wsActive ? '' : ' off'}" id="ws-st-${id}">${b.wsActive ? 'En línea' : 'Desconectado'}</span>
+          </div>
+        </div>
+        <!-- Controles de simulación -->
+        <div class="bus-controls">
+          <button class="ctrl-btn ctrl-pause" onclick="togglePause('${plate}')" title="${b.paused ? 'Reanudar' : 'Pausar'} simulación">${b.paused ? '▶' : '⏸'}</button>
+          <button class="ctrl-btn ctrl-reset" onclick="resetBus('${plate}')" title="Reiniciar ruta">↺</button>
+          <button class="ctrl-btn ctrl-locate" onclick="locateBus('${plate}')" title="Localizar en mapa">🎯</button>
+          <select class="speed-select" onchange="setBusSpeed('${plate}', this.value)" title="Velocidad simulación">
+            <option value="0.5">0.5×</option>
+            <option value="1" selected>1×</option>
+            <option value="2">2×</option>
+            <option value="5">5×</option>
+          </select>
+        </div>
+        <div class="dragging-label" id="drag-lbl-${id}"></div>
+        <!-- Botón principal del conductor -->
+        <button class="turno-btn turno-end" onclick="endTrip('${plate}', ${tripId || 0})" ${!tripId ? 'disabled' : ''}>
+          🏁 Terminar Turno
+        </button>
+      </div>`;
+  }
+}
+
+function updateBusUI(plate, progress, trips) {
+  const id = cssId(plate);
+  const pbar = document.getElementById(`pbar-${id}`);
+  const ppct = document.getElementById(`ppct-${id}`);
+  const tLabel = document.getElementById(`trips-${id}`);
+  if (pbar) pbar.style.width = progress + '%';
+  if (ppct) ppct.textContent = progress + '%';
+  if (tLabel) tLabel.textContent = `🔁 Viajes completados: ${trips}`;
+}
+
+function updateMarkerStyle(plate) {
+  const b = buses[plate];
+  if (!b) return;
+  const el = b.marker.getElement();
+  if (!el) return;
+  const body = el.querySelector('.bus-marker-body');
+  if (body) body.classList.toggle('sim-paused', b.paused);
+}
+
+function updatePopup(plate) {
+  const b = buses[plate];
+  if (!b) return;
+  const pos = b.marker.getLatLng();
+  const { shift } = b;
+  b.marker.setPopupContent(`
+    <b style="font-size:15px">🚌 ${plate}</b><br>
+    <span style="color:#64748b">${shift.name_route || `Ruta ${shift.id_route}`}</span><br>
+    <hr style="margin:6px 0;border-color:#e2e8f0">
+    👤 ${shift.name_driver || 'Sin conductor'}<br>
+    📊 Progreso: <b>${Math.round(b.progress)}%</b><br>
+    🔁 Viajes hoy: <b>${b.trips}</b><br>
+    📍 Lat: ${pos.lat.toFixed(6)}<br>
+    📍 Lng: ${pos.lng.toFixed(6)}<br>
+    ⚡ Velocidad: ${b.speed}×
+  `);
+}
+
+function renderTripsList() {
+  const cont = document.getElementById('trips-list');
+  if (!allTrips.length) {
+    cont.innerHTML = `<div class="empty-state"><div class="icon">📋</div>Sin viajes hoy</div>`;
+    return;
+  }
+  const statusLabel = { 1:'Pendiente', 2:'Asignado', 3:'Activo', 4:'Completado' };
+  cont.innerHTML = allTrips.map(t => {
+    const st  = t.id_status || t.status_trip;
+    const rid = t.id_route;
+    const isPending = (st === 1 || st === 2);
+    let actionBtn;
+    if (isPending) {
+      const ts = getTripTimeStatus(t);
+      if (ts.ok) {
+        actionBtn = `<button class="btn-start-trip" onclick="event.stopPropagation(); startTrip(${t.id_trip}, '${t.plate_number}')">▶ Iniciar</button>`;
+      } else if (ts.reason === 'early') {
+        actionBtn = `<button class="btn-start-trip early" disabled title="El turno inicia a las ${fmtTime(t.start_time)}">⏳ ${fmtTime(t.start_time)}</button>`;
+      } else {
+        actionBtn = `<button class="btn-start-trip expired" disabled title="El turno venció a las ${fmtTime(t.end_time)}">✕ Vencido</button>`;
+      }
+    } else if (st === 4) {
+      // Completado: permitir reactivar si aún está dentro del horario
+      const ts = getTripTimeStatus(t);
+      if (ts.ok) {
+        actionBtn = `
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+            <div class="trip-status-badge status-4">Completado</div>
+            <button class="btn-reactivate" onclick="event.stopPropagation(); reactivateTrip(${t.id_trip}, '${t.plate_number}')">↩ Reactivar</button>
+          </div>`;
+      } else {
+        actionBtn = `<div class="trip-status-badge status-4">Completado</div>`;
+      }
+    } else {
+      actionBtn = `<div class="trip-status-badge status-${st}">${statusLabel[st]||'—'}</div>`;
+    }
+    return `
+    <div class="trip-row" onclick="focusRoute(${rid})" style="cursor:pointer" title="Ver ruta en mapa">
+      <div class="trip-status-dot" style="background:${t.color_route||'#64748b'}"></div>
+      <div class="trip-info">
+        <div class="trip-plate">${t.plate_number}</div>
+        <div class="trip-route">${t.name_route || `Ruta ${rid}`}</div>
+      </div>
+      <div class="trip-time">${fmtTime(t.start_time)} – ${fmtTime(t.end_time)}</div>
+      ${actionBtn}
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════
+// HELPERS GEOMÉTRICOS
+// ════════════════════════════════════════
+// Devuelve el estado horario de un viaje respecto a la hora actual en Colombia
+function getTripTimeStatus(trip) {
+  if (!trip.start_time || !trip.end_time) return { ok: true };
+  // Hora actual en Colombia como HH:MM:SS (comparación de strings funciona con formato 0-padded)
+  const nowCO = new Date().toLocaleTimeString('en-GB', { timeZone: 'America/Bogota', hour12: false });
+  const start = String(trip.start_time).substring(0, 8);
+  const end   = String(trip.end_time).substring(0, 8);
+  if (nowCO < start) return { ok: false, reason: 'early' };
+  if (nowCO > end)   return { ok: false, reason: 'expired' };
+  return { ok: true };
+}
+
+function getCoords(geojson) {
+  if (!geojson) return [];
+  try {
+    const obj = typeof geojson === 'string' ? JSON.parse(geojson) : geojson;
+    const raw = obj.coordinates || [];
+    if (raw.length === 0) return [];
+    // Detectar orden: si el primer valor es < -30 es longitud (GeoJSON estándar [lng,lat])
+    // Si el primer valor es pequeño positivo (~7 para Colombia), ya es [lat,lng]
+    const [a, b] = raw[0];
+    const needsSwap = (a < -30); // longitud de Colombia (~-73) en posición 0
+    return raw.map(([x, y]) => needsSwap ? [y, x] : [x, y]);
+  } catch (e) { return []; }
+}
+
+function interpolatePoint(path, progress) {
+  if (!path || path.length === 0) return null;
+  const p = Math.max(0, Math.min(100, progress));
+  if (p === 0) return path[0];
+  if (p >= 100) return path[path.length - 1];
+  const total = path.length - 1;
+  const idx = Math.floor((p / 100) * total);
+  const frac = ((p / 100) * total) - idx;
+  if (idx >= total) return path[total];
+  const [lat1, lng1] = path[idx];
+  const [lat2, lng2] = path[idx + 1];
+  return [lat1 + (lat2 - lat1) * frac, lng1 + (lng2 - lng1) * frac];
+}
+
+function nearestProgress(path, [lat, lng]) {
+  if (!path || path.length < 2) return null;
+  let bestDist = Infinity, bestIdx = 0;
+  for (let i = 0; i < path.length; i++) {
+    const d = Math.hypot(path[i][0] - lat, path[i][1] - lng);
+    if (d < bestDist) { bestDist = d; bestIdx = i; }
+  }
+  return (bestIdx / (path.length - 1)) * 100;
+}
+
+function makeBusIcon(plate, routeColor, ambCode) {
+  const color = getBusColor(plate); // Color único por placa
+  const rawLabel = ambCode || plate || '---';
+  const stripped = rawLabel.includes('-') ? rawLabel.split('-').pop() : rawLabel;
+  const label = stripped.length > 8 ? stripped.slice(0, 8) : stripped;
+  const html = `
+    <div class="bus-gps-marker">
+      <div class="bus-marker-body" style="background:${color};border-color:${routeColor || 'white'}" title="${plate}">🚌</div>
+      <div class="bus-amb-label">${label}</div>
+    </div>`;
+  return L.divIcon({ html, className: 'bus-marker-icon', iconSize: [32, 48], iconAnchor: [16, 24] });
+}
+
+// ════════════════════════════════════════
+// COLOR POR PLACA (sincronizado con src/utils/busColors.js)
+// ════════════════════════════════════════
+const BUS_COLOR_PALETTE = [
+  '#ef4444','#f97316','#eab308','#22c55e',
+  '#14b8a6','#3b82f6','#8b5cf6','#ec4899',
+  '#06b6d4','#84cc16','#f59e0b','#6366f1',
+];
+function getBusColor(plate) {
+  if (!plate) return '#667eea';
+  const str = String(plate).toUpperCase();
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 31 + str.charCodeAt(i)) & 0x7fffffff;
+  }
+  return BUS_COLOR_PALETTE[hash % BUS_COLOR_PALETTE.length];
+}
+
+// ════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════
+function cssId(str) { return str.replace(/[^a-zA-Z0-9]/g, '_'); }
+function fmtTime(t) {
+  if (!t) return '—';
+  return String(t).substring(0, 5);
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === (name === 'buses' ? 0 : 1)));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+}
+
+// Centrar mapa en una ruta al hacer clic en la lista de programados
+function refreshTiles() {
+  if (!baseTile) return;
+  map.removeLayer(baseTile);
+  baseTile = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '&copy; <a href="https://www.esri.com/">Esri</a> &copy; OpenStreetMap contributors',
+    maxZoom: 20
+  });
+  baseTile.addTo(map);
+  baseTile.bringToBack();
+}
+
+function focusRoute(routeId) {
+  const line = bgRouteLines[routeId];
+  if (!line) return;
+  const bounds = line.getBounds();
+  if (!bounds.isValid()) return;
+  map.fitBounds(bounds, { padding: [60, 60], animate: false });
+  line.setStyle({ opacity: 1, weight: 5 });
+  // Recrear la capa de tiles para forzar su recarga en las nuevas coordenadas
+  setTimeout(refreshTiles, 50);
+  setTimeout(() => {
+    if (bgRouteLines[routeId]) bgRouteLines[routeId].setStyle({ opacity: 0.7, weight: 4 });
+  }, 2500);
+}
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+(async function init() {
+  initMap();
+  initSocket();
+  await loadRoutes();       // 1. Dibujar todas las rutas en el mapa
+  await loadShifts();       // 2. Buses activos (animados)
+  await loadAllTrips();     // 3. Turnos del día + marcadores programados
+  startSimLoop();
+  // Refrescar cada 60 segundos
+  setInterval(loadRoutes,   120_000);
+  setInterval(loadShifts,    60_000);
+  setInterval(loadAllTrips,  60_000);
+})();
+</script>
+</body>
+</html>

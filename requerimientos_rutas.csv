@@ -1,0 +1,31 @@
+Id;Categoría;Requerimiento;Estado Actual;Observaciones
+1;Panel de rutas;"La sección debe tener un label que diga ""Listado de rutas""";Parcial;"Dice ""Control de Rutas"" y usa pestañas"
+2;Panel de rutas;"Debe tener un cuadro de texto con placeholder que diga ""Buscar ruta por nombre o por ID""";Pendiente;No hay input de búsqueda
+3;Panel de rutas;"Debajo del cuadro de texto de ""Buscar Rutas"" deben aparecer el listado de rutas creadas";Completado;El listado aparece (sin el buscador)
+4;Panel de rutas;"El cuadro de texto de ""Buscar Rutas"" funciona como filtro y buscador de rutas por nombre o Id";Pendiente;
+5;Panel de rutas;"La sección debe tener un botón con nombre ""Crear Ruta Nueva""";Completado;Botón + Nueva Ruta
+6;Panel de rutas;"Al oprimir el botón ""Crear Ruta Nueva"" este desaparece y aparecen 3 botones ""Deshacer Punto"", ""Guardar Ruta"" y ""Cancelar""";Completado;Se ve en modo edición mapa
+7;Panel de rutas;"Al oprimir el botón ""Crear Ruta Nueva"", este permitirá establecer una nueva ruta que podra ser dibujada por medio de puntos en el mapa";Completado;
+8;Panel de rutas;Al colocar los puntos en el mapa estos deben poder unirse automaticamente por una linea punteada a medida que se va colocando un punto nuevo en el mapa;Completado;Usa ruteo OSRM
+9;Panel de rutas;"El botón ""Deshacer punto"" permite quitar el último punto establecido";Completado;
+10;Panel de rutas;"El botón ""Guardar Ruta"" permite guardar la ruta previamente trazada con los puntos";Completado;
+11;Panel de rutas;"El botón ""Cancelar"" permite cancelar el proceso de creación de Ruta";Completado;
+12;Panel de rutas;En la lista de rutas debe aparecer un punto con el color de la ruta, el nombre de la ruta, un botón para ver/ocultar ruta, un botón para asignar bus, un botón para elimnar ruta y un botón en forma de flecha para desplegar los buses asignados a la ruta;Parcial;Faltan opciones asignar bus y flecha desplegable
+13;Panel de rutas;"El botón ""Ver/ocultar"" muestra u oculta en cada ruta creada";Completado;Función enfoque/ocultar (??)
+14;Panel de rutas;El botón para eliminar Ruta quita la ruta del listado;Completado;
+15;Panel de rutas;El botón flecha despliega los buses asignados a la ruta y los nombre de los nombres de sus respectivos conductores;Pendiente;UI no implementada
+16;Definición Geográfica;La plataforma debe permitir el trazado de rutas mediante la selección de puntos secuenciales sobre un mapa interactivo (GIS).;Completado;
+17;Gestión de Atributos;El software facilitará la edición de metadatos de la ruta como nombre descriptivo, áreas de origen/destino y color de representación.;Completado;
+18;Cálculo de Distancia;El sistema debe calcular automáticamente la longitud total de cada ruta en kilómetros utilizando funciones de análisis espacial.;Parcial;Backend calcula distancia acumulada, falta en UI
+19;Control de Visibilidad;La interfaz permitirá mostrar u ocultar capas de rutas de forma individual o masiva para optimizar la visualización en el mapa de monitoreo.;Completado;Botón ??? Ocultar Todas
+20;Búsqueda Geoespacial;La herramienta posibilitará la localización de rutas específicas mediante filtros de texto por nombre o descripción técnica.;Pendiente;Falta input
+21;Vínculo de Flota;El sistema debe mostrar la relación de buses que están actualmente operando o asignados a una ruta particular.;Pendiente;Requiere UI de despliegue
+22;Catálogo de Paradas;"La sección debe incluir una pestaña independiente de ""Rutas"" para gestionar el catálogo global de paradas (puntos de interés).";Completado;No estaba documentado en el Excel original
+23;Catálogo de Paradas;Permitir la creación de nuevos puntos en el catálogo seleccionando coordenadas directamente en el mapa sin asociarlos a una ruta inicial.;Completado;No estaba documentado
+24;Catálogo de Paradas;Permitir la edición de nombre y la eliminación de puntos del catálogo global, verificando restricciones si están en uso.;Completado;No estaba documentado
+25;Asignación de Paradas;Permitir asignar puntos existentes del catálogo a una ruta específica mediante un panel de gestión (??).;Completado;No estaba documentado
+26;Asignación de Paradas;Al trazar una nueva ruta en el mapa, el sistema debe sugerir acoplarse a paradas del catálogo ya existentes si el clic del usuario ocurre a una distancia cercana.;Completado;No estaba documentado
+27;Ordenamiento de Rutas;La plataforma debe permitir cambiar el orden secuencial de las paradas dentro de una ruta (reordenamiento lógico), afectando su punto de ruta y cálculo de distancia.;Completado;No estaba documentado
+28;Enfoque de Ruta;"La interfaz debe ofrecer un modo ""Enfoque"" que, al ser activado, oculte todas las demás rutas y dibuje los marcadores de la ruta seleccionada numerados secuencialmente.";Completado;No estaba documentado
+29;Trazado Inteligente (Routing);El trazado de rutas debe ajustarse automáticamente a la red vial (calles reales y sentido de vías) utilizando un servicio de enrutamiento como OSRM, en lugar de líneas rectas.;Completado;No estaba documentado
+30;Sincronización de Datos;La manipulación de paradas (creación y ordenamiento) debe sincronizarse con la base de datos para prevenir colisiones de integridad antes de escribir los datos localmente.;Completado;No estaba documentado

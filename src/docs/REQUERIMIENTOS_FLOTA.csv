@@ -1,0 +1,20 @@
+Column1;Column2;Column3;Column4
+Módulo;Tipo;Requerimiento;Descripción/Regla
+Gestión de Flota;Funcional;Registro de Unidad;La aplicación debe permitir registrar cada bus con su número de placa oficial, código interno AMB y capacidad de pasajeros.
+Gestión de Flota;Funcional;Control Documental;El software facilitará el seguimiento de documentos legales almacenando las fechas de vencimiento del SOAT, Técnico-Mecánica y pólizas de seguros.
+Gestión de Flota;Funcional;Alertas de Vencimiento;La plataforma alertará automáticamente sobre los vehículos que tengan documentos próximos a vencer en una ventana de 30 días.
+Gestión de Flota;Funcional;Identificación Visual;El sistema posibilitará la carga de una fotografía del bus (máximo 5MB) para su identificación rápida en la plataforma.
+Gestión de Flota;Funcional;Asignación de Conductor;La herramienta debe permitir vincular o desvincular un conductor a un bus específico de forma dinámica.
+Gestión de Flota;Funcional;Historial de Asignaciones;El software permitirá consultar el registro histórico de todos los conductores que han sido responsables de una unidad en el pasado.
+Gestión de Flota;Funcional;Filtros Avanzados;La plataforma debe permitir el filtrado de la flota por nombre de la empresa operadora, estado de disponibilidad y coincidencia de placa.
+Gestión de Flota;Funcional;Seguimiento de Propiedad;El sistema registrará obligatoriamente el nombre y documento de identidad del propietario legal de cada vehículo.
+Gestión de Flota;Funcional;Estado Situacional;"La aplicación clasificará cada bus automáticamente en estados como ""En servicio"", ""Disponible"", ""Con conductor"" o ""Inactivo""."
+Gestión de Flota;Funcional;Dashboard de Capacidad;La plataforma calculará y mostrará en tiempo real la capacidad total de pasajeros que la flota operativa puede transportar.
+Gestión de Flota;Negocio;Formato de Placa;El sistema validará estrictamente que las placas cumplan con el estándar nacional de 3 letras seguidas de 3 números (ej: ABC123).
+Gestión de Flota;Negocio;Formato AMB;"La herramienta asegurará que el código de la autoridad de transporte siga el patrón oficial ""AMB-####"" (ej: AMB-0001)."
+Gestión de Flota;Negocio;Rango de Capacidad;El software restringirá la creación de buses con una capacidad inferior a 10 pasajeros o superior a 999.
+Gestión de Flota;Negocio;Vigencia Futura;El sistema impedirá el ingreso de fechas de vencimiento de documentos que sean iguales o menores a la fecha actual.
+Gestión de Flota;Negocio;Bloqueo Administrativo;"La aplicación evitará que un bus marcado como ""Inactivo"" pueda ser asignado a conductores o rutas de servicio."
+Gestión de Flota;No Funcional;Integridad de Datos;La infraestructura debe garantizar que los números de placa se procesen siempre en mayúsculas para asegurar la unicidad del registro.
+Gestión de Flota;No Funcional;Borrado Seguro;El software implementará la técnica de inactivación lógica (soft-delete) para no perder el historial de viajes asociados a la unidad.
+Gestión de Flota;No Funcional;UX de Identificación;La interfaz mostrará la placa del vehículo superpuesta sobre el ícono del bus para facilitar la lectura rápida en listas extensas.
