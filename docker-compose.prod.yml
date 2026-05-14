@@ -41,12 +41,8 @@ services:
       NODE_ENV: production
       ALLOWED_ORIGINS: http://20.151.50.235,http://localhost,http://127.0.0.1
       SOCKET_IO_ORIGINS: http://20.151.50.235,http://localhost,http://127.0.0.1
-      JWT_SECRET: ${JWT_SECRET:-a7f9e2b5c3d8a1k4m6n9p2q5s7t0v3x6y8z1b4d7f9h2j5k8m1o4q7s0u3w6z}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
-      GMAIL_USER: ${GMAIL_USER:-perezrico441@gmail.com}
-      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD:-iuelrnzqespgigmg}
-      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-AIzaSyBsoJhBKrdvCCzu6ZJTeS4i7TXR-d644uI}
-      ORS_API_KEY: ${ORS_API_KEY:-eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImYwOWUxNDYwOWQ3YzQzOTY4Mjk4N2Y4NjYzYWY4NzE0IiwiaCI6Im11cm11cjY0In0=}
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy
