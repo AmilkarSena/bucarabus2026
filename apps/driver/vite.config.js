@@ -60,5 +60,5 @@ export default defineConfig({
       '/api': { target: 'http://localhost:3001', changeOrigin: true }
     }
   },
-  build: { outDir: 'dist', assetsDir: 'assets' }
+  build: { outDir: '../../dist_conductor', emptyOutDir: true, assetsDir: 'assets' }
 })

@@ -132,7 +132,8 @@ export default defineConfig({
     host: '0.0.0.0'
   },
   build: {
-    outDir: 'dist',
+    outDir: 'dist_admin',
+    emptyOutDir: true,
     assetsDir: 'assets'
   }
 })

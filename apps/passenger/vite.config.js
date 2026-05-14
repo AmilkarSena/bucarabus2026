@@ -108,7 +108,8 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: 'dist',
+    outDir: '../../dist_pasajero',
+    emptyOutDir: true,
     assetsDir: 'assets'
   }
 })
