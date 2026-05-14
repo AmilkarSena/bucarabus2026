@@ -45,13 +45,9 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ./api/server.js:/app/server.js:ro
-      - ./api/routes/shifts.routes.js:/app/routes/shifts.routes.js:ro
-      - ./api/services/incidents.service.js:/app/services/incidents.service.js:ro
-      - ./api/routes/geocoding.routes.js:/app/routes/geocoding.routes.js:ro
-      - ./api/controllers/trips.controller.js:/app/controllers/trips.controller.js:ro
-      - ./api/services/trips.service.js:/app/services/trips.service.js:ro
-      - ./api/services/shifts.service.js:/app/services/shifts.service.js:ro
+      - ./api:/app
+      - /app/node_modules
+      - ./shared:/shared
     networks:
       - bucarabus_net
 
