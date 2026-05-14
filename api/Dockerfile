@@ -9,6 +9,10 @@ COPY package*.json ./
 # Instalar las dependencias
 RUN npm install
 
+# Crear un enlace simbólico en la raíz para que las carpetas mapeadas (como /shared)
+# puedan resolver las dependencias instaladas en /app/node_modules
+RUN ln -s /app/node_modules /node_modules
+
 # Copiar el resto del código de la API al contenedor
 COPY . .
 
