@@ -3,11 +3,11 @@ node_modules/
 .npm
 .eslintcache
 
-# Compilaciones
+# Compilaciones (Solo ignoramos la carpeta 'dist' genérica, permitimos las dist_ específicas para producción)
 dist/
-dist_admin/
-dist_pasajero/
-dist_conductor/
+# dist_admin/
+# dist_pasajero/
+# dist_conductor/
 *.local
 
 # Archivos grandes y respaldos
