@@ -35,6 +35,17 @@
             <span class="icon">📖</span>
             Catálogo de Rutas
           </a>
+
+          <!-- Botón PWA Condicional -->
+          <a 
+            v-if="isInstallable"
+            href="#" 
+            class="nav-item pwa-btn" 
+            @click.prevent="installPWA"
+          >
+            <span class="icon">⬇️</span>
+            Instalar App
+          </a>
         </nav>
 
         <div class="menu-footer">
@@ -46,6 +57,8 @@
 </template>
 
 <script setup>
+import { usePWAInstall } from '../composables/usePWAInstall.js'
+
 defineProps({
   isOpen: { type: Boolean, default: false },
   currentView: { type: String, default: 'home' }
@@ -59,6 +72,9 @@ const navigate = (view) => {
   emit('navigate', view)
   closeMenu()
 }
+
+// Lógica de PWA
+const { isInstallable, installPWA } = usePWAInstall()
 </script>
 
 <style scoped>
@@ -168,6 +184,19 @@ const navigate = (view) => {
 
 .nav-item.active .icon {
   opacity: 1;
+}
+
+/* Estilo sutil para el botón PWA */
+.pwa-btn {
+  margin-top: 12px;
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px dashed #bbf7d0;
+}
+
+.pwa-btn:hover {
+  background-color: #dcfce7;
+  color: #15803d;
 }
 
 .menu-footer {
