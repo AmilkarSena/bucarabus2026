@@ -67,9 +67,12 @@
             Monitorea en tiempo real tu flota de buses, optimiza rutas y mejora la experiencia de tus pasajeros con nuestra plataforma integral basada en GPS y WebSocket.
           </p>
           <div class="hero-actions">
-            <button class="btn-hero-primary" @click="goToMonitor">🚀 Comenzar Ahora</button>
-            <button class="btn-hero-secondary" @click="goToPassengerApp">📱 Ver Demo</button>
-            <button class="btn-hero-secondary temp-sim-btn" @click="goToSimulator">🕹️ Simulador</button>
+            <button class="btn-hero-primary" @click="goToMonitor">
+              {{ monitorButtonText }}
+            </button>
+            <button class="btn-hero-secondary" @click="goToPassengerApp">
+              📱 Ver Demo
+            </button>
           </div>
           <div class="trusted-strip">
             <span class="trusted-label">Usado por:</span>
