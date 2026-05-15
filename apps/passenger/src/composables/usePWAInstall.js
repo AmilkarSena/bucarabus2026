@@ -1,55 +1,43 @@
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
+
+// Estado global para que el evento no se pierda si se dispara muy temprano
+const deferredPrompt = ref(null)
+const isInstallable = ref(false)
+
+const handleBeforeInstallPrompt = (e) => {
+  e.preventDefault()
+  deferredPrompt.value = e
+  isInstallable.value = true
+}
+
+const handleAppInstalled = () => {
+  deferredPrompt.value = null
+  isInstallable.value = false
+  console.log('PWA instalada con éxito')
+}
+
+// Escuchar los eventos tan pronto como se cargue el script (muy temprano)
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+  window.addEventListener('appinstalled', handleAppInstalled)
+}
 
 export function usePWAInstall() {
-  const deferredPrompt = ref(null)
-  const isInstallable = ref(false)
-
-  const handleBeforeInstallPrompt = (e) => {
-    // Previene que el mini-infobar de Chrome aparezca automáticamente
-    e.preventDefault()
-    // Guarda el evento para poder dispararlo después
-    deferredPrompt.value = e
-    // Actualiza el estado para mostrar nuestro botón de instalación
-    isInstallable.value = true
-  }
-
   const installPWA = async () => {
     if (!deferredPrompt.value) return
 
-    // Muestra el prompt de instalación nativo
     deferredPrompt.value.prompt()
-
-    // Espera a que el usuario responda al prompt
     const { outcome } = await deferredPrompt.value.userChoice
     
-    // Opcional: limpiar la variable si ya fue instalada o rechazada
     if (outcome === 'accepted') {
       console.log('El usuario aceptó instalar la PWA')
     } else {
       console.log('El usuario rechazó la instalación')
     }
     
-    // Independientemente de la elección, el prompt no puede usarse de nuevo
     deferredPrompt.value = null
     isInstallable.value = false
   }
-
-  // Detectar si ya fue instalada exitosamente para ocultar el botón
-  const handleAppInstalled = () => {
-    deferredPrompt.value = null
-    isInstallable.value = false
-    console.log('PWA instalada con éxito')
-  }
-
-  onMounted(() => {
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-    window.addEventListener('appinstalled', handleAppInstalled)
-  })
-
-  onUnmounted(() => {
-    window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-    window.removeEventListener('appinstalled', handleAppInstalled)
-  })
 
   return {
     isInstallable,

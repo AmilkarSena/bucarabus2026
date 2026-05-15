@@ -78,6 +78,10 @@ export default defineConfig({
           }
           // NOTA: /api/shifts (buses en tiempo real) NO se cachea — siempre requiere red
         ]
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module'
       }
     })
   ],
