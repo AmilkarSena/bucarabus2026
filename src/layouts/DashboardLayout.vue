@@ -3,10 +3,17 @@
     <!-- HEADER PRINCIPAL -->
     <AppHeader />
 
-    <!-- LAYOUT SIN MAPA -->
+    <!-- LAYOUT PRINCIPAL -->
     <div class="main-layout" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
       <!-- SIDEBAR NAVEGACIÓN -->
       <AppSidebar @toggle="toggleSidebar" />
+
+      <!-- Backdrop para móvil (oscurece el fondo cuando el menú está abierto) -->
+      <div
+        v-if="appStore.sidebarOpen"
+        class="sidebar-backdrop"
+        @click="appStore.toggleSidebar"
+      ></div>
 
       <!-- ÁREA PRINCIPAL - CONTENIDO COMPLETO -->
       <main class="main-content">
@@ -30,7 +37,9 @@ import AppHeader from '../components/AppHeader.vue'
 import AppSidebar from '../components/AppSidebar.vue'
 import AppStatusBar from '../components/AppStatusBar.vue'
 import AppModals from '../components/AppModals.vue'
+import { useAppStore } from '../stores/app'
 
+const appStore = useAppStore()
 const sidebarCollapsed = ref(false)
 
 const toggleSidebar = () => {
@@ -40,68 +49,58 @@ const toggleSidebar = () => {
 
 <style scoped>
 .dashboard-layout {
-  height: 100vh;
-  width: 100vw;
-  display: grid;
-  grid-template-rows: 70px 1fr 50px;
-  overflow: hidden;
-}
-
-.main-layout {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  height: 100%;
-  transition: grid-template-columns 0.3s ease;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
   background: #f8fafc;
 }
 
-.main-layout.sidebar-collapsed {
-  grid-template-columns: 60px 1fr;
+.main-layout {
+  display: flex;
+  flex: 1;
+  width: 100%;
 }
 
 .main-content {
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
 }
 
 .content-wrapper {
-  flex: 1;
-  overflow-y: auto;
   padding: 24px;
+  width: 100%;
 }
 
-/* Scrollbar styling */
-.content-wrapper::-webkit-scrollbar {
-  width: 8px;
-}
-
-.content-wrapper::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-.content-wrapper::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-.content-wrapper::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+.sidebar-backdrop {
+  display: none;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .main-layout {
-    grid-template-columns: 100%;
+  .dashboard-layout {
+    display: block;
   }
 
-  .main-layout.sidebar-collapsed {
-    grid-template-columns: 100%;
+  .main-layout {
+    flex-direction: column;
   }
 
   .content-wrapper {
     padding: 16px;
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 850; /* Por debajo del sidebar (900) */
   }
 }
 </style>

@@ -530,12 +530,17 @@ onUnmounted(() => {
 
 /* Responsive */
 @media (max-width: 768px) {
+  #main-header {
+    height: 60px;
+    padding: 0 12px;
+  }
+
   .header-stats {
     display: none;
   }
 
   .logo h1 {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .user-details {
@@ -543,7 +548,28 @@ onUnmounted(() => {
   }
 
   .user-info {
-    padding: 6px;
+    padding: 4px;
+    background: transparent;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+
+  .logout-btn {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .user-menu {
+    gap: 8px;
+  }
+
+  .icon-btn {
+    width: 34px;
+    height: 34px;
   }
 }
 </style>

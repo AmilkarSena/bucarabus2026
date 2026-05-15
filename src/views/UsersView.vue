@@ -51,7 +51,7 @@
 
     <div class="users-table-container">
       <table class="users-table">
-        <thead>
+        <thead class="mobile-hidden">
           <tr>
             <th>ID</th>
             <th>Usuario</th>
@@ -62,8 +62,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in filteredUsers" :key="user.id_user">
-            <td class="user-id-cell">{{ user.id_user }}</td>
+          <tr v-for="user in filteredUsers" :key="user.id_user" class="user-row">
+            <td class="user-id-cell mobile-hidden">{{ user.id_user }}</td>
             <td class="user-cell">
               <div class="user-info-compact">
                 <div class="user-avatar-small">
@@ -71,11 +71,24 @@
                 </div>
                 <div class="user-name-col">
                   <span class="name">{{ user.full_name }}</span>
+                  <div class="user-meta-mobile mobile-only">
+                    <span class="email-sub">{{ user.email_user }}</span>
+                    <div class="roles-inline">
+                      <span 
+                        v-for="role in user.roles" 
+                        :key="role.id_role" 
+                        class="role-tag-mini" 
+                        :class="getRoleClass(role.id_role)"
+                      >
+                        {{ role.role_name }}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </td>
-            <td>{{ user.email_user }}</td>
-            <td>
+            <td class="mobile-hidden">{{ user.email_user }}</td>
+            <td class="roles-cell-wrapper mobile-hidden">
               <div class="roles-cell">
                 <span 
                   v-for="role in user.roles" 
@@ -87,22 +100,14 @@
                 </span>
               </div>
             </td>
-            <td>
-              <span class="status-badge-small" :class="user.is_active ? 'active' : 'inactive'">
-                {{ user.is_active ? 'Activo' : 'Inactivo' }}
-              </span>
+            <td class="status-cell-wrapper">
+              <span class="status-dot-user" :class="user.is_active ? 'active' : 'inactive'" :title="user.is_active ? 'Activo' : 'Inactivo'"></span>
             </td>
-            <td>
+            <td class="actions-cell-wrapper">
               <div class="actions-cell">
-                <button class="btn-icon" title="Editar" @click="editUser(user)">
-                  ✏️
-                </button>
-                <button class="btn-icon" title="Gestionar Roles" @click="manageRoles(user)">
-                  🎭
-                </button>
-                <button class="btn-icon" title="Cambiar Contraseña" @click="changePassword(user)">
-                  🔑
-                </button>
+                <button class="btn-icon" title="Editar" @click="editUser(user)">✏️</button>
+                <button class="btn-icon" title="Gestionar Roles" @click="manageRoles(user)">🎭</button>
+                <button class="btn-icon mobile-hidden" title="Cambiar Contraseña" @click="changePassword(user)">🔑</button>
                 <button 
                   v-if="!user.roles?.some(r => r.id_role === 1)"
                   class="btn-icon" 
@@ -1179,5 +1184,108 @@ onMounted(() => {
   .form-row {
     grid-template-columns: 1fr;
   }
+}
+.role-tag-mini {
+  font-size: 9px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.user-meta-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.roles-inline {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .users-section { padding: 10px; }
+  
+  .section-header {
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+
+  .header-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 columnas para que sean muy pequeñas */
+    gap: 6px;
+    width: 100%;
+  }
+
+  .stat-card {
+    min-width: 0;
+    padding: 8px 4px;
+    text-align: center;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    box-shadow: none;
+  }
+
+  .stat-card h3 { font-size: 8px; margin-bottom: 2px; color: #94a3b8; }
+  .stat-card span { font-size: 14px; font-weight: 800; }
+
+  .header-actions { width: 100%; }
+  .header-actions .btn { 
+    width: 100%; 
+    justify-content: center; 
+    padding: 8px; 
+    font-size: 13px; 
+    border-radius: 6px;
+  }
+
+  .users-controls { padding: 0; margin-bottom: 12px; background: transparent; box-shadow: none; }
+  .search-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .search-input { width: 100%; padding: 8px 12px; font-size: 14px; border-radius: 6px; }
+  
+  .filter-select-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .filter-select { padding: 8px; font-size: 12px; border-radius: 6px; }
+
+  .mobile-hidden { display: none !important; }
+  .mobile-only { display: flex; }
+
+  .users-table-container { background: transparent; box-shadow: none; overflow: visible; }
+  .users-table, .users-table tbody, .users-table tr { display: block; width: 100%; }
+  
+  .user-row {
+    display: flex !important;
+    align-items: center;
+    padding: 10px 0;
+    background: white;
+    border-bottom: 1px solid #f1f5f9;
+    gap: 10px;
+  }
+
+  .users-table td { padding: 0 !important; border: none !important; }
+
+  .user-cell { flex: 1; min-width: 0; }
+  .user-info-compact { gap: 8px; }
+  .user-avatar-small { width: 36px; height: 36px; font-size: 14px; background: #667eea; color: white; border-radius: 10px; }
+  .user-name-col .name { font-size: 14px; color: #1e293b; }
+  .email-sub { font-size: 11px; color: #94a3b8; }
+
+  .status-cell-wrapper { width: 16px; display: flex; justify-content: center; margin-right: 4px; }
+  .status-dot-user { width: 8px; height: 8px; }
+
+  .actions-cell-wrapper { width: auto; }
+  .actions-cell { gap: 4px; }
+  .btn-icon { width: 34px; height: 34px; font-size: 14px; background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; }
 }
 </style>

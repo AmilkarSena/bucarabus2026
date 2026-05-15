@@ -59,31 +59,26 @@ const toggleSidebar = () => {
 
 <style scoped>
 .base-layout {
-  height: 100vh;
-  width: 100vw;
-  display: grid;
-  grid-template-rows: 70px 1fr 50px;
-  overflow: hidden;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .main-layout {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  height: 100%;
-  transition: grid-template-columns 0.3s ease;
+  display: flex;
+  flex: 1;
+  width: 100%;
   background: #f8fafc;
   position: relative;
 }
 
-.main-layout.sidebar-collapsed {
-  grid-template-columns: 60px 1fr;
-}
-
 .main-content {
   position: relative;
-  overflow: hidden;
+  flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 /* Estilos para vista con mapa */
@@ -115,37 +110,14 @@ const toggleSidebar = () => {
 
 /* Estilos para vista sin mapa */
 .content-wrapper {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
   padding: 24px;
-}
-
-.content-wrapper::-webkit-scrollbar {
-  width: 8px;
-}
-
-.content-wrapper::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-.content-wrapper::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-.content-wrapper::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  width: 100%;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .main-layout {
-    grid-template-columns: 100%;
-  }
-
-  .main-layout.sidebar-collapsed {
-    grid-template-columns: 100%;
+    flex-direction: column;
   }
 
   .content-wrapper {

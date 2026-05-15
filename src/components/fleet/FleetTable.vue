@@ -2,7 +2,7 @@
   <div>
     <div class="fleet-table-container">
       <table class="fleet-table">
-        <thead>
+        <thead class="mobile-hidden">
           <tr>
             <th>ID</th>
             <th>Bus</th>
@@ -13,9 +13,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="bus in filteredBuses" :key="bus.id_bus">
-            <td class="id-cell">{{ bus.id_bus }}</td>
-            <td class="bus-cell">
+          <tr v-for="bus in filteredBuses" :key="bus.id_bus" class="fleet-row">
+            <td class="id-cell mobile-hidden" data-label="ID">{{ bus.id_bus }}</td>
+            <td class="bus-cell" data-label="Bus">
               <div class="bus-info-compact">
                 <div class="bus-avatar-with-plate">
                   <div class="bus-emoji">🚌</div>
@@ -30,42 +30,32 @@
                 </div>
               </div>
             </td>
-            <td>
+            <td class="company-cell-wrapper" data-label="Empresa">
               <div class="company-cell">
                 <span class="company-name" :class="getCompanyClass(bus.id_company)">
                   {{ getCompanyName(bus.id_company) }}
                 </span>
               </div>
             </td>
-            <td>
-              <div class="coverage-row">
-                <template v-if="(bus.insurance_coverage || []).length">
-                  <span
-                    v-for="a in bus.insurance_coverage"
-                    :key="'i-' + a.type"
-                    class="doc-chip"
-                    :class="chipClass(a.status)"
-                    :title="a.name + ': ' + alertLabel(a.status)"
-                  >{{ a.type }}</span>
-                </template>
-                <span v-else class="no-coverage">—</span>
+            <td class="status-summary-cell">
+              <div class="coverage-inline-mobile">
+                <span
+                  v-for="a in (bus.insurance_coverage || [])"
+                  :key="'i-' + a.type"
+                  class="status-dot-small"
+                  :class="chipClass(a.status)"
+                  :title="a.name"
+                ></span>
+                <span
+                  v-for="a in (bus.transit_doc_coverage || [])"
+                  :key="'d-' + a.type"
+                  class="status-dot-small"
+                  :class="chipClass(a.status)"
+                  :title="a.name"
+                ></span>
               </div>
             </td>
-            <td>
-              <div class="coverage-row">
-                <template v-if="(bus.transit_doc_coverage || []).length">
-                  <span
-                    v-for="a in bus.transit_doc_coverage"
-                    :key="'d-' + a.type"
-                    class="doc-chip"
-                    :class="chipClass(a.status)"
-                    :title="a.name + ': ' + alertLabel(a.status)"
-                  >{{ a.type }}</span>
-                </template>
-                <span v-else class="no-coverage">—</span>
-              </div>
-            </td>
-            <td>
+            <td class="actions-cell-wrapper" data-label="Acciones">
               <div class="actions-cell">
                 <button
                   v-if="canEdit"
@@ -320,16 +310,131 @@ const getDriverName = (driverId) => {
 .btn-icon:hover { background:#f8fafc; border-color:#cbd5e1; transform:translateY(-1px); }
 .btn-icon-compliance:hover { background:#e0f2fe; border-color:#38bdf8; }
 
-/* ── Sin datos ──────────────────────────────────────────────── */
-.no-data-cell { text-align: center; padding: 40px; color: #64748b; font-style: italic; }
+.status-dot-small {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.status-dot-small.chip-valid { background: #10b981; }
+.status-dot-small.chip-warning { background: #f59e0b; }
+.status-dot-small.chip-expired { background: #ef4444; }
+.status-dot-small.chip-missing { background: #cbd5e1; }
 
-.no-data {
-  text-align: center;
-  padding: 40px 20px;
-  color: #64748b;
-  font-style: italic;
-  background: #f8fafc;
-  border-radius: 12px;
-  margin: 20px 0;
+.coverage-row-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.coverage-group {
+  display: flex;
+  gap: 3px;
+  justify-content: flex-end;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .fleet-table-container {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    max-height: none;
+  }
+
+  .mobile-hidden { display: none !important; }
+
+  .fleet-table, .fleet-table tbody, .fleet-table tr {
+    display: block;
+    width: 100% !important;
+  }
+
+  .fleet-row {
+    display: flex !important;
+    align-items: center;
+    padding: 10px 8px; /* Ajuste para evitar corte izquierdo */
+    background: white;
+    border-bottom: 1px solid #f1f5f9;
+    gap: 8px;
+    margin-bottom: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .fleet-table td {
+    padding: 0 !important;
+    border: none !important;
+    display: block;
+    width: auto !important;
+  }
+
+  .fleet-table td::before { display: none !important; }
+
+  .bus-info-compact {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    text-align: left;
+  }
+
+  .bus-avatar-with-plate {
+    width: 44px;
+    height: 38px;
+    margin-left: 2px; /* Margen de seguridad */
+  }
+
+  .bus-emoji { font-size: 16px; margin-top: -6px; }
+  .bus-plate-overlay { font-size: 6px; bottom: 2px; }
+
+  .bus-name-col {
+    align-items: flex-start;
+    text-align: left;
+    max-width: 130px;
+  }
+  .bus-name-col .code { font-size: 13px; }
+  .bus-name-col .driver { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+
+  .company-cell-wrapper {
+    display: none !important;
+  }
+
+  .status-summary-cell {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .coverage-inline-mobile {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    justify-content: flex-end;
+    max-width: 40px;
+  }
+
+  .status-dot-small {
+    width: 6px;
+    height: 6px;
+  }
+
+  .actions-cell-wrapper {
+    width: auto !important;
+  }
+
+  .actions-cell {
+    background: transparent !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 8px !important;
+  }
+
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    border-radius: 8px;
+    box-shadow: none;
+  }
 }
 </style>

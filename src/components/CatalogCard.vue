@@ -17,7 +17,7 @@
     <div class="catalog-table-container">
       <div v-if="loading" class="loading-state">Cargando...</div>
       <table v-else class="catalog-table">
-        <thead>
+        <thead class="mobile-hidden">
           <tr>
             <th class="th-id">ID</th>
             <th>Nombre</th>
@@ -30,20 +30,21 @@
           <tr v-if="items.length === 0">
             <td :colspan="extraKey ? 5 : 4" class="empty-row">Sin registros</td>
           </tr>
-          <tr v-for="item in items" :key="item[idKey]">
+          <tr v-for="item in items" :key="item[idKey]" class="catalog-row">
             <td class="id-cell">{{ item[idKey] }}</td>
-            <td>{{ item[nameKey] }}</td>
-            <td v-if="extraKey">{{ item[extraKey] }}</td>
-            <td>
-              <span class="status-badge" :class="item.is_active ? 'active' : 'inactive'">
-                {{ item.is_active ? 'Activo' : 'Inactivo' }}
-              </span>
+            <td class="name-cell">
+              <span class="main-text">{{ item[nameKey] }}</span>
+              <span v-if="extraKey" class="sub-text">{{ item[extraKey] }}</span>
+            </td>
+            <td class="status-cell">
+              <span class="status-dot" :class="item.is_active ? 'active' : 'inactive'" :title="item.is_active ? 'Activo' : 'Inactivo'"></span>
+              <span class="status-label mobile-hidden">{{ item.is_active ? 'Activo' : 'Inactivo' }}</span>
             </td>
             <td class="actions-cell">
-              <button v-if="canEdit" class="btn-action" @click="$emit('edit', item)" title="Editar">✏️</button>
+              <button v-if="canEdit" class="btn-action edit" @click="$emit('edit', item)" title="Editar">✏️</button>
               <button
                 v-if="canToggle"
-                class="btn-action"
+                class="btn-action toggle"
                 @click="$emit('toggle', item)"
                 :title="item.is_active ? 'Inactivar' : 'Activar'"
               >{{ item.is_active ? '🔴' : '🟢' }}</button>
@@ -167,19 +168,12 @@ defineEmits(['create', 'edit', 'toggle'])
   white-space: nowrap;
 }
 
-.catalog-table thead th:nth-child(2) {
-  width: 100%;
-}
-
-.th-id { width: 48px; }
-
 .catalog-table tbody tr {
   border-bottom: 1px solid #f1f5f9;
   transition: background 0.15s;
 }
 
 .catalog-table tbody tr:hover { background: #f8fafc; }
-.catalog-table tbody tr:last-child { border-bottom: none; }
 
 .catalog-table td {
   padding: 7px 12px;
@@ -198,17 +192,14 @@ defineEmits(['create', 'edit', 'toggle'])
   font-size: 13px;
 }
 
-.status-badge {
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
   display: inline-block;
-  padding: 2px 9px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
-  white-space: nowrap;
 }
-
-.status-badge.active   { background: #dcfce7; color: #166534; }
-.status-badge.inactive { background: #f1f5f9; color: #64748b; }
+.status-dot.active { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+.status-dot.inactive { background: #94a3b8; }
 
 .actions-cell {
   display: flex;
@@ -246,6 +237,36 @@ defineEmits(['create', 'edit', 'toggle'])
 }
 
 .btn.primary { background: #2563eb; color: white; }
-.btn.primary:hover { background: #1d4ed8; }
 .btn-sm { padding: 5px 11px; font-size: 12px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .catalog-card { border: none; border-radius: 0; }
+  .card-header {
+    padding: 12px 16px;
+    background: white;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .card-title h3 { font-size: 14px; }
+  .mobile-hidden { display: none !important; }
+  .catalog-table, .catalog-table tbody, .catalog-table tr { display: block; width: 100%; }
+  .catalog-row {
+    display: flex !important;
+    align-items: center;
+    padding: 12px 16px;
+    background: white;
+    border-bottom: 1px solid #f1f5f9;
+    gap: 12px;
+  }
+  .id-cell { width: 30px; font-size: 10px; color: #cbd5e1; padding: 0 !important; }
+  .name-cell { flex: 1; display: flex; flex-direction: column; padding: 0 !important; min-width: 0; }
+  .main-text { font-size: 14px; font-weight: 500; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sub-text { font-size: 11px; color: #94a3b8; }
+  .status-cell { width: 24px; padding: 0 !important; display: flex; justify-content: center; }
+  .actions-cell { width: auto; padding: 0 !important; gap: 12px; border: none !important; }
+  .btn-action {
+    width: 36px; height: 36px; border: none; background: #f1f5f9;
+    font-size: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  }
+}
 </style>

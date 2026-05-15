@@ -41,6 +41,5 @@ onMounted(async () => {
 body {
   margin: 0;
   padding: 0;
-  overflow: hidden;
 }
 </style>

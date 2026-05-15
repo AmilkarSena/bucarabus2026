@@ -399,4 +399,61 @@ const deleteRoute = async (route) => {
   color: #667eea !important;
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tab-actions {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .action-btn {
+    padding: 10px;
+    font-size: 0.8rem;
+    border-radius: 8px;
+  }
+
+  .filters-container {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .search-input {
+    font-size: 0.85rem;
+    padding: 8px 10px 8px 28px;
+  }
+
+  .status-filter {
+    font-size: 0.8rem;
+    padding: 8px;
+  }
+
+  .routes-list-scroll {
+    max-height: 40vh;
+    margin: 0 -12px;
+    padding: 0 12px 12px;
+  }
+
+  .route-item {
+    border-radius: 8px;
+  }
+
+  .route-main {
+    padding: 10px 8px;
+  }
+
+  .route-name {
+    font-size: 0.85rem;
+  }
+
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+  }
+}
 </style>

@@ -116,14 +116,24 @@ const {
 
 /* Responsive */
 @media (max-width: 768px) {
+  .fleet-section { padding: 12px; }
+  
   .section-header {
     flex-direction: column;
-    gap: 16px;
-    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 16px;
   }
 
   .header-actions {
+    width: 100%;
+  }
+
+  .header-actions .btn {
+    width: 100%;
     justify-content: center;
+    padding: 10px;
+    font-size: 14px;
   }
 }
 </style>

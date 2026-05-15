@@ -43,23 +43,25 @@
     <!-- Filtros -->
     <section class="filters-section">
       <div class="filter-group">
-        <label>Semana:</label>
+        <label class="mobile-hidden">Semana:</label>
         <div class="week-navigator">
           <button class="nav-btn" @click="previousWeek">◀</button>
           <span class="week-label">{{ weekRangeLabel }}</span>
           <button class="nav-btn" @click="nextWeek">▶</button>
-          <input 
-            type="date" 
-            :value="weekPickerDate"
-            @change="goToSelectedWeek"
-            class="week-picker"
-            title="Selecciona una fecha para ir a esa semana"
-          />
         </div>
       </div>
-      <button class="btn-today" @click="goToCurrentWeek">
-        📅 Hoy
-      </button>
+      <div class="filter-actions">
+        <input 
+          type="date" 
+          :value="weekPickerDate"
+          @change="goToSelectedWeek"
+          class="week-picker"
+          title="Selecciona una fecha"
+        />
+        <button class="btn-today" @click="goToCurrentWeek">
+          📅 Hoy
+        </button>
+      </div>
     </section>
 
     <!-- Tabla de Turnos por Ruta y Fecha -->
@@ -623,6 +625,26 @@ onMounted(async () => {
   min-height: 360px;
 }
 
+.shifts-table-section::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 30px;
+  background: linear-gradient(to left, rgba(255,255,255,0.9), transparent);
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+@media (max-width: 768px) {
+  .shifts-table-section::after {
+    opacity: 1;
+  }
+}
+
 /* Loading overlay */
 .loading-overlay {
   position: absolute;
@@ -728,7 +750,7 @@ onMounted(async () => {
 }
 
 .shifts-table td {
-  padding: 12px;
+  padding: 10px 8px;
   border-bottom: 1px solid #f1f5f9;
   text-align: center;
   vertical-align: middle;
@@ -954,40 +976,139 @@ onMounted(async () => {
   }
 
   .shifts-table-section {
-    height: calc(100vh - 420px);
+    height: auto;
+    min-height: 400px;
   }
   
   .dashboard-header {
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
     text-align: center;
+    margin-bottom: 20px;
   }
   
   .stats-section {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
   
   .filters-section {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
+    padding: 12px;
+    align-items: stretch;
+  }
+
+  .filter-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .week-navigator {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .week-label {
+    min-width: auto;
+    font-size: 13px;
+    flex: 1;
   }
 }
 
 @media (max-width: 768px) {
-  .stats-section {
-    grid-template-columns: 1fr;
+  .shifts-dashboard {
+    padding: 12px 8px;
+  }
+
+  .mobile-hidden {
+    display: none;
   }
 
   .shifts-table-section {
-    height: calc(100vh - 460px);
+    height: auto;
+    margin: 0 -8px 24px;
+    border-radius: 0;
+    box-shadow: none;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    overflow: visible;
   }
-  
-  .recent-shift-card {
-    flex-wrap: wrap;
+
+  .table-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    width: 100vw;
   }
-  
-  .shift-route {
+
+  .shifts-table th.route-column {
+    min-width: 110px;
+    padding-left: 12px;
+    position: sticky;
+    left: 0;
+    background: #f8fafc;
+    z-index: 20;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+  }
+
+  .route-cell {
+    padding-left: 12px !important;
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 10;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+  }
+
+  .header-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     width: 100%;
+  }
+
+  .header-actions .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 14px;
+    font-size: 14px;
+  }
+
+  .route-name {
+    font-size: 11px;
+  }
+
+  .shifts-table th.day-column {
+    min-width: 75px;
+  }
+
+  .day-number {
+    font-size: 14px;
+  }
+  
+  .recent-shifts-section {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .recent-shift-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    position: relative;
+  }
+
+  .shift-stats {
+    width: 100%;
+  }
+
+  .btn-view-shift {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 6px 12px;
   }
 }
 </style>

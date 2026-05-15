@@ -323,4 +323,26 @@ async function handleToggle(item) {
 
 /* Sidebar fijo de 200px, panel ocupa el resto */
 :deep(.catalog-sidebar) { width: 200px; flex-shrink: 0; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .catalogs-section {
+    gap: 0;
+  }
+
+  .page-header {
+    padding: 15px;
+    background: white;
+    margin-bottom: 0;
+  }
+
+  .catalogs-layout {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  :deep(.catalog-sidebar) {
+    width: 100% !important;
+  }
+}
 </style>

@@ -16,6 +16,13 @@ const activeTab = ref('routes')
 // Estado para controlar cuándo mostrar el creador masivo de paradas
 const isCreatingPoint = ref(false)
 
+// Control de colapso en móvil
+const isCollapsed = ref(window.innerWidth < 768)
+
+const toggleCollapse = () => {
+  isCollapsed.value = !isCollapsed.value
+}
+
 const handleStartCreatePoint = () => {
   isCreatingPoint.value = true
   appStore.isCreatingRoutePoint = true
@@ -30,12 +37,17 @@ const handleCloseCreatePoint = () => {
 </script>
 
 <template>
-  <div class="routes-widget">
+  <div class="routes-widget" :class="{ 'collapsed': isCollapsed }">
     <div class="widget-card">
       <div class="widget-header">
-        <h3>🛣️ Control de Rutas</h3>
+        <div class="header-main">
+          <h3>🛣️ Control de Rutas</h3>
+          <button class="collapse-btn" @click="toggleCollapse">
+            {{ isCollapsed ? '🔼' : '🔽' }}
+          </button>
+        </div>
         <!-- ─── Pestañas ──────────────────────────────────────── -->
-        <div class="widget-tabs">
+        <div class="widget-tabs" v-show="!isCollapsed">
           <button
             class="tab-btn"
             :class="{ active: activeTab === 'routes' }"
@@ -49,7 +61,7 @@ const handleCloseCreatePoint = () => {
         </div>
       </div>
 
-      <div class="widget-content">
+      <div class="widget-content" v-show="!isCollapsed">
         <!-- ══════════════════════════════════════════════════════
              TAB: RUTAS
         ══════════════════════════════════════════════════════ -->
@@ -82,53 +94,118 @@ const handleCloseCreatePoint = () => {
 /* Estilos globales del widget (Layout principal) */
 .routes-widget {
   max-width: 380px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .widget-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.92);
   border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(10px);
-  /* Permitir que crezca con el contenido y ocultar bordes internos sobrantes */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
+
 .widget-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 16px 20px 0;
   color: white;
-  /* Ya no necesita border-radius superior si .widget-card tiene overflow:hidden, pero lo dejamos por seguridad */
-  border-radius: 16px 16px 0 0;
 }
+
+.header-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
 .widget-header h3 {
-  margin: 0 0 12px;
-  font-size: 1.2rem;
-  font-weight: 600;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
+
+.collapse-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 .widget-tabs {
   display: flex;
-  gap: 2px;
+  gap: 4px;
 }
+
 .tab-btn {
   flex: 1;
-  padding: 8px 12px;
+  padding: 10px 12px;
   border: none;
-  border-radius: 8px 8px 0 0;
-  background: rgba(255,255,255,0.15);
-  color: rgba(255,255,255,0.8);
-  font-size: 0.88rem;
-  font-weight: 600;
+  border-radius: 10px 10px 0 0;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.7);
+  font-size: 0.85rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition: all 0.2s;
 }
-.tab-btn:hover {
-  background: rgba(255,255,255,0.25);
-  color: white;
-}
+
 .tab-btn.active {
   background: white;
   color: #667eea;
 }
+
 .widget-content {
-  padding: 20px;
+  padding: 16px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* RESPONSIVE MÓVIL */
+@media (max-width: 768px) {
+  .routes-widget {
+    position: fixed;
+    bottom: 20px;
+    left: 10px;
+    right: 10px;
+    max-width: none;
+    z-index: 1000;
+  }
+
+  .routes-widget.collapsed {
+    bottom: 10px;
+  }
+
+  .widget-header {
+    padding-bottom: 12px;
+  }
+
+  .widget-header.collapsed {
+    padding-bottom: 0;
+  }
+
+  .widget-content {
+    max-height: 50vh;
+    padding: 12px;
+  }
+
+  .tab-btn {
+    padding: 12px;
+    font-size: 0.8rem;
+  }
 }
 </style>
 

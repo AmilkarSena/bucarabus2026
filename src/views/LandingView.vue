@@ -28,8 +28,25 @@
             {{ buttonText }} →
           </button>
         </div>
+        <button class="mobile-menu-btn" @click="toggleMobileMenu">☰</button>
       </div>
     </header>
+
+    <!-- ═══ MOBILE MENU OVERLAY ═══ -->
+    <div class="mobile-menu-overlay" :class="{ 'open': isMobileMenuOpen }">
+      <button class="mobile-close-btn" @click="toggleMobileMenu">✕</button>
+      <nav class="mobile-nav-links">
+        <button @click="scrollTo('features'); toggleMobileMenu()">Características</button>
+        <button @click="scrollTo('how-it-works'); toggleMobileMenu()">Cómo Funciona</button>
+        <button @click="scrollTo('testimonials'); toggleMobileMenu()">Clientes</button>
+        <button @click="scrollTo('contact'); toggleMobileMenu()">Contacto</button>
+        <button @click="scrollTo('footer'); toggleMobileMenu()">Legal</button>
+        <div class="mobile-auth-links" v-if="!authStore.isAuthenticated">
+          <button class="btn-ghost" @click="goToLogin">Iniciar Sesión</button>
+          <button class="btn-accent" @click="goToRegister">Registrarse</button>
+        </div>
+      </nav>
+    </div>
 
     <!-- ═══ HERO ═══ -->
     <section class="hero-section">
@@ -167,8 +184,58 @@
       </div>
     </section>
 
+    <!-- ═══ CONTACT ═══ -->
+    <section id="contact" class="contact-section">
+      <div class="section-container">
+        <div class="section-header scroll-reveal">
+          <div class="section-badge">Contacto</div>
+          <h2 class="section-title">Estamos para ayudarte</h2>
+          <p class="section-subtitle">¿Tienes dudas o necesitas una demo personalizada para tu empresa?</p>
+        </div>
+        <div class="contact-grid">
+          <div class="contact-info scroll-reveal">
+            <div class="contact-card">
+              <div class="contact-icon">📧</div>
+              <div class="contact-details">
+                <h4>Correo Electrónico</h4>
+                <p>soporte@bucarabus.com</p>
+              </div>
+            </div>
+            <div class="contact-card">
+              <div class="contact-icon">📱</div>
+              <div class="contact-details">
+                <h4>WhatsApp / Teléfono</h4>
+                <p>+57 300 123 4567</p>
+              </div>
+            </div>
+            <div class="contact-card">
+              <div class="contact-icon">📍</div>
+              <div class="contact-details">
+                <h4>Ubicación</h4>
+                <p>Bucaramanga, Santander, CO</p>
+              </div>
+            </div>
+          </div>
+          <div class="contact-form-wrap scroll-reveal">
+            <form class="landing-form" @submit.prevent>
+              <div class="form-row">
+                <input type="text" placeholder="Nombre completo" required />
+              </div>
+              <div class="form-row">
+                <input type="email" placeholder="Correo electrónico" required />
+              </div>
+              <div class="form-row">
+                <textarea placeholder="¿En qué podemos ayudarte?" rows="4" required></textarea>
+              </div>
+              <button type="submit" class="btn-hero-primary" style="width: 100%">Enviar Mensaje →</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ═══ CTA ═══ -->
-    <section id="contact" class="cta-section scroll-reveal">
+    <section id="cta" class="cta-section scroll-reveal">
       <div class="cta-glow"></div>
       <div class="cta-content">
         <div class="cta-badge">¿Listo para empezar?</div>
@@ -197,7 +264,7 @@
         <div class="footer-links">
           <div class="footer-col"><h4>Producto</h4><button @click="scrollTo('features')">Características</button><button @click="scrollTo('how-it-works')">Cómo Funciona</button><button @click="goToMonitor">Acceder</button></div>
           <div class="footer-col"><h4>Plataforma</h4><a href="#">Monitor GPS</a><a href="#">Gestión de Flota</a><a href="#">App Conductor</a></div>
-          <div class="footer-col"><h4>Soporte</h4><button @click="scrollTo('contact')">Contacto</button><a href="#">Documentación</a><a href="#">Estado del Sistema</a></div>
+          <div class="footer-col"><h4>Contacto & Soporte</h4><a href="mailto:soporte@bucarabus.com">soporte@bucarabus.com</a><a href="tel:+573000000000">+57 300 000 0000</a><a href="#">Documentación</a></div>
         </div>
       </div>
       <div class="footer-bottom">
@@ -224,6 +291,10 @@ import LegalModal from '../components/modals/LegalModal.vue'
 const router = useRouter()
 const authStore = useAuthStore()
 const statsSection = ref(null)
+
+// ── Estado de Menú Móvil ──────────────────────────────────────────
+const isMobileMenuOpen = ref(false)
+const toggleMobileMenu = () => isMobileMenuOpen.value = !isMobileMenuOpen.value
 
 // ── Estado de Modales Legales ─────────────────────────────────────
 const showLegalModal = ref(false)
@@ -360,10 +431,16 @@ onUnmounted(() => {
 }
 
 /* ═══════════════ ANIMATIONS ═══════════════ */
-.fade-up { opacity: 0; transform: translateY(32px); transition: opacity 0.7s ease, transform 0.7s ease; }
-.fade-up-delay { opacity: 0; transform: translateY(32px); transition: opacity 0.7s ease 0.25s, transform 0.7s ease 0.25s; }
-.scroll-reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease var(--delay, 0s), transform 0.6s ease var(--delay, 0s); }
 .fade-up.visible, .fade-up-delay.visible, .scroll-reveal.visible { opacity: 1; transform: none; }
+
+/* Forzar visibilidad en móviles por si falla el IntersectionObserver */
+@media (max-width: 1024px) {
+  .fade-up, .scroll-reveal, .fade-up-delay {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
 
 /* ═══ HEADER ═══ */
 .landing-header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); border-bottom: 1px solid #e2e8f0; padding: 0.875rem 0; }
@@ -517,22 +594,51 @@ onUnmounted(() => {
 .footer-bottom-links a { color: #475569; text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
 .footer-bottom-links a:hover { color: var(--primary); }
 
+/* ═══ MOBILE MENU ═══ */
+.mobile-menu-btn { display: none; background: none; border: none; font-size: 1.8rem; color: var(--dark); cursor: pointer; padding: 0; }
+.mobile-menu-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.98); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(10px); }
+.mobile-menu-overlay.open { opacity: 1; pointer-events: auto; }
+.mobile-close-btn { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; font-size: 2rem; color: var(--dark); cursor: pointer; }
+.mobile-nav-links { display: flex; flex-direction: column; gap: 2rem; align-items: center; }
+.mobile-nav-links button { background: none; border: none; font-size: 1.5rem; font-weight: 700; color: var(--dark); cursor: pointer; transition: color 0.2s; }
+.mobile-nav-links button:hover { color: var(--primary); }
+.mobile-auth-links { margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem; width: 100%; padding: 0 2rem; }
+.mobile-auth-links button { width: 100%; padding: 1rem; font-size: 1.1rem; text-align: center; }
+
+/* ═══ CONTACT ═══ */
+.contact-section { padding: 7rem 2rem; background: white; }
+.contact-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 4rem; margin-top: 3rem; }
+.contact-info { display: flex; flex-direction: column; gap: 1.5rem; }
+.contact-card { display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem; background: var(--light); border-radius: 12px; border: 1px solid #e2e8f0; transition: all 0.3s; }
+.contact-card:hover { transform: translateX(10px); border-color: var(--primary); }
+.contact-icon { font-size: 2rem; }
+.contact-details h4 { margin: 0 0 4px 0; color: var(--dark); font-size: 1rem; }
+.contact-details p { margin: 0; color: var(--gray); font-size: 0.9rem; }
+
+.contact-form-wrap { background: var(--white); padding: 2.5rem; border-radius: var(--radius); border: 1px solid #e2e8f0; box-shadow: 0 20px 40px rgba(0,0,0,.05); }
+.landing-form { display: flex; flex-direction: column; gap: 1.25rem; }
+.landing-form input, .landing-form textarea { width: 100%; padding: 1rem; border: 1.5px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 0.95rem; transition: border-color 0.2s; }
+.landing-form input:focus, .landing-form textarea:focus { outline: none; border-color: var(--primary); }
+
 /* ═══ RESPONSIVE ═══ */
 @media (max-width: 1024px) {
+  .nav-menu, .header-actions { display: none; }
+  .mobile-menu-btn { display: block; }
   .hero-container { grid-template-columns: 1fr; gap: 3rem; }
   .hero-mockup { display: none; }
   .step-connector { display: none; }
   .footer-container { grid-template-columns: 1fr; gap: 2rem; }
+  .contact-grid { grid-template-columns: 1fr; gap: 3rem; }
 }
 @media (max-width: 768px) {
-  .nav-menu { display: none; }
   .header-container { padding: 0 1.5rem; gap: 1rem; }
   .stats-container { flex-wrap: wrap; gap: 2rem; }
   .stat-divider { display: none; }
   .hero-section { padding: 4rem 1.5rem 3rem; min-height: auto; margin-top: 70px; }
-  .features-section, .how-section, .testimonials-section, .cta-section { padding: 4rem 1.5rem; }
+  .features-section, .how-section, .testimonials-section, .cta-section, .contact-section { padding: 4rem 1.5rem; }
   .footer-links { grid-template-columns: 1fr 1fr; }
   .footer-bottom { flex-direction: column; text-align: center; }
+  .section-title { white-space: normal; line-height: 1.3; }
 }
 @media (max-width: 480px) {
   .header-container { padding: 0 1rem; gap: 0.5rem; }

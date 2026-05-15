@@ -91,12 +91,28 @@ defineEmits([
 }
 
 @media (max-width: 768px) {
+  .fleet-controls {
+    margin: 15px 0;
+    padding: 0 4px;
+  }
+
   .search-filters {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
   }
 
   .search-input {
+    grid-column: span 2;
     min-width: auto;
+    padding: 12px;
+    font-size: 15px; /* Evitar zoom automático en iOS */
+  }
+
+  .filter-select {
+    width: 100%;
+    padding: 10px;
+    font-size: 13px;
   }
 }
 </style>

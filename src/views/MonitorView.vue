@@ -1251,4 +1251,78 @@ onMounted(() => {
     transform: rotate(360deg);
   }
 }
+
+/* ═══════════════ RESPONSIVE ═══════════════ */
+@media (max-width: 1024px) {
+  .monitor-widget {
+    max-width: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .monitor-widget {
+    max-width: 95%;
+    margin: 0 auto;
+    position: fixed;
+    bottom: 20px;
+    left: 10px;
+    right: 10px;
+    z-index: 1100;
+  }
+
+  .monitor-widget.collapsed {
+    max-width: 95%;
+  }
+
+  .widget-card {
+    max-height: 50vh; /* Ocupa la mitad de la pantalla para dejar ver el mapa */
+    box-shadow: 0 -5px 25px rgba(0,0,0,0.2);
+  }
+
+  .monitor-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .monitor-stat-card {
+    padding: 12px 8px;
+  }
+
+  .stat-number {
+    font-size: 20px;
+  }
+
+  .stat-label {
+    font-size: 9px;
+  }
+
+  .monitor-tab {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .active-routes-cards {
+    padding: 12px;
+  }
+
+  .cards-grid {
+    max-height: 35vh;
+  }
+  
+  .search-input {
+    padding: 8px 35px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .monitor-widget {
+    bottom: 15px;
+    left: 8px;
+    right: 8px;
+  }
+  
+  .widget-header h3 {
+    font-size: 13px;
+  }
+}
 </style>
