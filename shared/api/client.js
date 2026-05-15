@@ -8,7 +8,7 @@ const getApiBaseUrl = () => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL
   const hostname = window.location.hostname
   if (hostname === 'localhost' || hostname === '127.0.0.1') return 'http://localhost:3001/api'
-  return `http://${hostname}/api`
+  return `http://${hostname}:3001/api`
 }
 
 const apiClient = axios.create({

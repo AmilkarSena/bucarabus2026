@@ -526,15 +526,22 @@ onUnmounted(() => {
 }
 @media (max-width: 768px) {
   .nav-menu { display: none; }
+  .header-container { padding: 0 1.5rem; gap: 1rem; }
   .stats-container { flex-wrap: wrap; gap: 2rem; }
   .stat-divider { display: none; }
-  .hero-section { padding: 4rem 1.5rem 3rem; min-height: auto; }
+  .hero-section { padding: 4rem 1.5rem 3rem; min-height: auto; margin-top: 70px; }
   .features-section, .how-section, .testimonials-section, .cta-section { padding: 4rem 1.5rem; }
   .footer-links { grid-template-columns: 1fr 1fr; }
   .footer-bottom { flex-direction: column; text-align: center; }
 }
 @media (max-width: 480px) {
-  .hero-actions { flex-direction: column; }
+  .header-container { padding: 0 1rem; gap: 0.5rem; }
+  .logo-text { font-size: 1.1rem; }
+  .header-actions { gap: 0.4rem; }
+  .btn-ghost, .btn-accent { padding: 0.4rem 0.6rem; font-size: 0.75rem; border-radius: 8px; }
+  .hero-title { font-size: 2rem; }
+  .hero-actions { flex-direction: column; width: 100%; }
+  .btn-hero-primary, .btn-hero-secondary { width: 100%; text-align: center; }
   .footer-links { grid-template-columns: 1fr; }
 }
 </style>
