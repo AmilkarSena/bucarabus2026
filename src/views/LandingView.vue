@@ -344,9 +344,13 @@ const buttonText = computed(() => {
 const goToMonitor = () => {
   if (authStore.isAuthenticated) {
     const role = authStore.userRole
-    if (role === 'driver') router.push('/conductor')
-    else if (role === 'passenger') router.push('/pasajero')
-    else router.push('/monitor')
+    if (role === 'driver') {
+      window.location.href = window.location.origin + '/conductor/'
+    } else if (role === 'passenger') {
+      window.location.href = window.location.origin + '/pasajero/'
+    } else {
+      router.push('/monitor')
+    }
   } else {
     router.push('/login')
   }
