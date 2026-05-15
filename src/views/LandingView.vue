@@ -22,7 +22,6 @@
           </div>
           <template v-if="!authStore.isAuthenticated">
             <button class="btn-ghost" @click="goToLogin">Iniciar Sesión</button>
-            <button class="btn-accent" @click="goToRegister">Registrarse →</button>
           </template>
           <button v-if="authStore.isAuthenticated" class="btn-accent" @click="goToMonitor">
             {{ buttonText }} →
@@ -43,7 +42,6 @@
         <button @click="scrollTo('footer'); toggleMobileMenu()">Legal</button>
         <div class="mobile-auth-links" v-if="!authStore.isAuthenticated">
           <button class="btn-ghost" @click="goToLogin">Iniciar Sesión</button>
-          <button class="btn-accent" @click="goToRegister">Registrarse</button>
         </div>
       </nav>
     </div>
@@ -246,7 +244,7 @@
         <h2>Transforma tu operación hoy</h2>
         <p>Únete a las empresas de Bucaramanga que ya digitalizaron su flota</p>
         <div class="cta-actions">
-          <button class="btn-cta-primary" @click="goToMonitor">🚀 Comenzar Gratis</button>
+          <button class="btn-cta-primary" @click="goToMonitor">🚀 Acceder al Sistema</button>
           <button class="btn-cta-secondary" @click="goToLogin">Iniciar Sesión</button>
         </div>
         <p class="cta-note">Sin tarjeta de crédito · Configuración en minutos · Soporte incluido</p>
