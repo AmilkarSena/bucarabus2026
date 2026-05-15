@@ -69,6 +69,7 @@
           <div class="hero-actions">
             <button class="btn-hero-primary" @click="goToMonitor">🚀 Comenzar Ahora</button>
             <button class="btn-hero-secondary" @click="goToPassengerApp">📱 Ver Demo</button>
+            <button class="btn-hero-secondary temp-sim-btn" @click="goToSimulator">🕹️ Simulador</button>
           </div>
           <div class="trusted-strip">
             <span class="trusted-label">Usado por:</span>
@@ -359,6 +360,15 @@ const goToPassengerApp = () => {
     : `${window.location.origin}/pasajero`
   window.open(url, '_blank')
 }
+
+// Botón temporal para abrir el simulador
+const goToSimulator = () => {
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  const url = isLocal
+    ? `${window.location.protocol}//${window.location.hostname}:3002/admin/simulator.html`
+    : `${window.location.origin}/admin/simulator.html`
+  window.open(url, '_blank')
+}
 const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
 const goToHome = () => {
   if (router.currentRoute.value.path === '/') {
@@ -487,6 +497,16 @@ onUnmounted(() => {
 .btn-hero-primary:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(102,126,234,.5); }
 .btn-hero-secondary { padding: 0.9rem 2rem; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; background: rgba(255,255,255,.07); color: white; border: 1.5px solid rgba(255,255,255,.2); transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; }
 .btn-hero-secondary:hover { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.4); }
+
+.temp-sim-btn {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+  color: #fcd34d !important;
+}
+.temp-sim-btn:hover {
+  background: rgba(245, 158, 11, 0.25) !important;
+  border-color: rgba(245, 158, 11, 0.6) !important;
+}
 .trusted-strip { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
 .trusted-label { font-size: 0.8rem; color: #64748b; font-weight: 500; }
 .trusted-logos { display: flex; gap: 0.75rem; flex-wrap: wrap; }
