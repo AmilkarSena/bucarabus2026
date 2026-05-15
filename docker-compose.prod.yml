@@ -39,8 +39,8 @@ services:
       DB_NAME: ${DB_NAME:-bucarabus}
       PORT: 3001
       NODE_ENV: production
-      ALLOWED_ORIGINS: http://20.151.50.235,http://localhost,http://127.0.0.1
-      SOCKET_IO_ORIGINS: http://20.151.50.235,http://localhost,http://127.0.0.1
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3004,https://bucarabus.canadacentral.cloudapp.azure.com
+      SOCKET_IO_ORIGINS: http://localhost:3000,http://localhost:3004,https://bucarabus.canadacentral.cloudapp.azure.com
     env_file:
       - .env
     depends_on:
